@@ -12,17 +12,47 @@ body{
   font-family:Arial,sans-serif;
   background:#0b0b0f;
   color:#fff;
+  overflow-x:hidden;
 }
+
+/* ====== BACKGROUND DECOR ====== */
+#bg{
+  position:fixed;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+}
+.shape{
+  position:absolute;
+  opacity:.18;
+}
+.circle{
+  border-radius:50%;
+}
+.square{
+  border-radius:14px;
+}
+.triangle{
+  width:0;
+  height:0;
+  border-style:solid;
+}
+
+/* ====== UI ====== */
 header{
   padding:20px;
   text-align:center;
   font-size:28px;
   font-weight:bold;
+  position:relative;
+  z-index:2;
 }
 .container{
   max-width:1100px;
   margin:auto;
   padding:20px;
+  position:relative;
+  z-index:2;
 }
 .grid{
   display:grid;
@@ -88,15 +118,11 @@ input,select,textarea{
   border-radius:10px;
   margin-bottom:10px;
 }
-
-/* 🔥 FIX checkbox ชิดซ้าย 100% */
 #addModeList label{
   display:grid;
   grid-template-columns:18px 1fr;
-  align-items:center;
   gap:8px;
   margin:6px 0;
-  cursor:pointer;
 }
 
 .preview{
@@ -120,41 +146,39 @@ input,select,textarea{
 
 <body>
 
+<div id="bg"></div>
+
 <button class="add-btn" onclick="openAdd()">＋</button>
 <header>หาเซิร์ฟเกม</header>
 
 <div class="container">
 
-<!-- หน้าแรก -->
 <div id="page1">
   <h2>เลือกเกม</h2>
   <div class="grid">
     <div class="card">
-      <img src="Minecraft_F.png" alt="Minecraft">
+      <img src="Minecraft_F.png">
       <button onclick="chooseGame('Minecraft')">Minecraft</button>
     </div>
     <div class="card">
-      <img src="Roblox_F.png" alt="Roblox">
+      <img src="Roblox_F.png">
       <button onclick="chooseGame('Roblox')">Roblox</button>
     </div>
   </div>
 </div>
 
-<!-- เลือกแนว -->
 <div id="page2" class="hidden">
   <button class="back" onclick="goPage(1)">← ย้อนกลับ</button>
   <h2 id="gameTitle"></h2>
   <div class="grid" id="modeList"></div>
 </div>
 
-<!-- เลือกเซิร์ฟ -->
 <div id="page3" class="hidden">
   <button class="back" onclick="goPage(2)">← ย้อนกลับ</button>
   <h2>เลือกเซิร์ฟเวอร์</h2>
   <div class="grid" id="serverList"></div>
 </div>
 
-<!-- รายละเอียด -->
 <div id="page4" class="hidden">
   <button class="back" onclick="goPage(3)">← ย้อนกลับ</button>
   <h2 id="detailName"></h2>
@@ -162,7 +186,6 @@ input,select,textarea{
   <div id="detailExtra"></div>
 </div>
 
-<!-- เพิ่มเซิร์ฟ -->
 <div id="addPage" class="hidden">
   <button class="back" onclick="goPage(1)">← ย้อนกลับ</button>
   <h2>เพิ่มเซิร์ฟเวอร์</h2>
@@ -173,15 +196,15 @@ input,select,textarea{
     <option>Roblox</option>
   </select>
 
-  <input id="addName" placeholder="ชื่อเซิร์ฟ *">
-  <textarea id="addDesc" placeholder="คำอธิบาย *"></textarea>
+  <input id="addName" placeholder="ชื่อเซิร์ฟ">
+  <textarea id="addDesc" placeholder="คำอธิบาย"></textarea>
 
   <div class="mode-box">
-    <b>แนวเกม *</b>
+    <b>แนวเกม</b>
     <div id="addModeList"></div>
   </div>
 
-  <b>รูปปกเซิร์ฟเวอร์ *</b>
+  <b>รูปปกเซิร์ฟ</b>
   <div class="preview" id="imgPreview">ยังไม่ได้เลือกรูป</div>
   <input type="file" accept="image/*" id="addImg">
 
@@ -200,12 +223,45 @@ input,select,textarea{
 </div>
 
 <script>
-/* 🔥 เพิ่ม Tower Defense ให้ Roblox แล้ว */
+/* ===== BACKGROUND RANDOM SHAPES ===== */
+function genBG(){
+  bg.innerHTML="";
+  const count=Math.floor(Math.random()*6)+4;
+  for(let i=0;i<count;i++){
+    const shape=document.createElement("div");
+    const size=Math.random()*160+60;
+    const color=`hsl(${Math.random()*360},70%,60%)`;
+    const type=["circle","square","triangle"][Math.floor(Math.random()*3)];
+
+    if(type==="triangle"){
+      shape.className="shape triangle";
+      shape.style.borderWidth=`${size/2}px ${size/2}px 0 ${size/2}px`;
+      shape.style.borderColor=`${color} transparent transparent transparent`;
+    }else{
+      shape.className=`shape ${type}`;
+      shape.style.width=size+"px";
+      shape.style.height=size+"px";
+      shape.style.background=color;
+    }
+
+    shape.style.left=Math.random()*innerWidth+"px";
+    shape.style.top=Math.random()*innerHeight+"px";
+    bg.appendChild(shape);
+  }
+}
+
+/* เปลี่ยนทุกครั้งที่กดปุ่ม */
+document.addEventListener("click",e=>{
+  if(e.target.tagName==="BUTTON") genBG();
+});
+
+genBG();
+
+/* ===== APP LOGIC ===== */
 const modesByGame={
   Minecraft:["Survival","RPG","PVP","Skyblock","Minigame"],
   Roblox:["Adventure","RPG","Simulator","Obby","PVP","Tower Defense"]
 };
-
 let servers=[],currentGame="";
 
 function show(p){
@@ -220,25 +276,21 @@ function chooseGame(g){
   gameTitle.innerText=g+" : เลือกแนวเกม";
   modeList.innerHTML="";
   modesByGame[g].forEach(m=>{
-    modeList.innerHTML+=`
-      <div class="card">
-        <button onclick="chooseMode('${m}')">${m}</button>
-      </div>`;
+    modeList.innerHTML+=`<div class="card"><button onclick="chooseMode('${m}')">${m}</button></div>`;
   });
   show("page2");
 }
 
 function chooseMode(m){
   serverList.innerHTML="";
-  const list=servers.filter(s=>s.game===currentGame && s.modes.includes(m));
-  if(!list.length) serverList.innerHTML="<p>(ยังไม่มีเซิร์ฟเวอร์)</p>";
-  list.forEach(s=>{
-    serverList.innerHTML+=`
+  servers.filter(s=>s.game===currentGame && s.modes.includes(m))
+    .forEach(s=>{
+      serverList.innerHTML+=`
       <div class="card">
         <img src="${s.img}">
         <button onclick="openDetail(${servers.indexOf(s)})">${s.name}</button>
       </div>`;
-  });
+    });
   show("page3");
 }
 
@@ -265,7 +317,6 @@ function updateAddModes(){
   });
 }
 
-/* preview รูป */
 addImg.onchange=()=>{
   const f=addImg.files[0];
   if(!f) return;
