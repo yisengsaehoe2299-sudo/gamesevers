@@ -306,11 +306,11 @@ function chooseGame(g){
 function chooseMode(m){
   serverList.innerHTML="";
   servers.filter(s=>s.game===currentGame && s.modes.includes(m))
-    .forEach(s=>{
+    .forEach((s,i)=>{
       serverList.innerHTML+=`
       <div class="card">
         <img src="${s.img}">
-        <button onclick="openDetail(${servers.indexOf(s)})">${s.name}</button>
+        <button onclick="openDetail(${i})">${s.name}</button>
       </div>`;
     });
   show("page3");
