@@ -7,11 +7,6 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
 body{background:#0b0b0f;color:#fff;overflow-x:hidden;}
-#bg{position:fixed;inset:0;z-index:0;pointer-events:none;}
-.shape{position:absolute;opacity:.18;}
-.circle{border-radius:50%}
-.square{border-radius:14px}
-.triangle{width:0;height:0;border-style:solid}
 header{padding:20px;text-align:center;font-size:28px;font-weight:bold;position:relative;z-index:2;}
 .container{max-width:1100px;margin:auto;padding:20px;position:relative;z-index:2;min-height:80vh;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;}
 .grid{display: flex;flex-wrap: wrap;justify-content: center;gap: 20px;}
@@ -36,7 +31,6 @@ input,select,textarea{width:100%;padding:10px;margin-bottom:10px;border-radius:8
 </head>
 <body>
 
-<div id="bg"></div>
 <button class="add-btn" onclick="openAdd()">＋</button>
 <header>หาเซิร์ฟเกม</header>
 
@@ -46,14 +40,8 @@ input,select,textarea{width:100%;padding:10px;margin-bottom:10px;border-radius:8
 <div id="page1" class="page">
   <h2>เลือกเกม</h2>
   <div class="grid">
-    <div class="card">
-      <img src="Minecraft_F.png">
-      <button onclick="chooseGame('Minecraft')">Minecraft</button>
-    </div>
-    <div class="card">
-      <img src="Roblox_F.png">
-      <button onclick="chooseGame('Roblox')">Roblox</button>
-    </div>
+    <div class="card"><img src="Minecraft_F.png"><button onclick="chooseGame('Minecraft')">Minecraft</button></div>
+    <div class="card"><img src="Roblox_F.png"><button onclick="chooseGame('Roblox')">Roblox</button></div>
   </div>
 </div>
 
@@ -93,32 +81,17 @@ input,select,textarea{width:100%;padding:10px;margin-bottom:10px;border-radius:8
   <input id="addName" placeholder="ชื่อเซิร์ฟ">
   <textarea id="addDesc" placeholder="คำอธิบาย"></textarea>
 
-  <!-- แนวเกม -->
-  <div class="mode-box">
-    <b>แนวเกม</b>
-    <div id="addModeList"></div>
-  </div>
+  <div class="mode-box"><b>แนวเกม</b><div id="addModeList"></div></div>
 
-  <!-- สำหรับ Minecraft -->
   <div id="mcExtra" class="hidden">
     <b>เวอร์ชันเกม</b>
-    <select id="mcVersion">
-      <option value="original">ของแท้เท่านั้น</option>
-      <option value="both">ทั้งแท้และเถื่อน</option>
-    </select>
-
+    <select id="mcVersion"><option value="original">ของแท้เท่านั้น</option><option value="both">ทั้งแท้และเถื่อน</option></select>
     <b>Edition / แพลตฟอร์ม</b>
-    <select id="mcEdition">
-      <option value="java">Java</option>
-      <option value="bedrock">Bedrock / แบคล๊อก</option>
-      <option value="both">ทั้งสอง</option>
-    </select>
-
+    <select id="mcEdition"><option value="java">Java</option><option value="bedrock">Bedrock / แบคล๊อก</option><option value="both">ทั้งสอง</option></select>
     <b>เวอร์ชันที่ใช้</b>
     <input id="mcRealVersion" placeholder="เช่น 1.20.1">
   </div>
 
-  <!-- รูปปก -->
   <b>รูปปกเซิร์ฟ</b>
   <div class="preview" id="imgPreview">ยังไม่ได้เลือกรูป</div>
   <input type="file" accept="image/*" id="addImg">
@@ -127,10 +100,7 @@ input,select,textarea{width:100%;padding:10px;margin-bottom:10px;border-radius:8
     <input id="pcIP" placeholder="PC IP">
     <input id="phoneIP" placeholder="Phone IP">
   </div>
-
-  <div id="rbxFields" class="hidden">
-    <input id="rbxLink" placeholder="ลิงก์ Roblox">
-  </div>
+  <div id="rbxFields" class="hidden"><input id="rbxLink" placeholder="ลิงก์ Roblox"></div>
 
   <button onclick="saveServer()">บันทึก</button>
 </div>
@@ -151,44 +121,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-/* Background */
-const bg = document.getElementById("bg");
-function genBG(){
-  bg.innerHTML="";
-  const count=Math.floor(Math.random()*6)+4;
-  for(let i=0;i<count;i++){
-    const shape=document.createElement("div");
-    const size=Math.random()*160+60;
-    const color=`hsl(${Math.random()*360},70%,60%)`;
-    const type=["circle","square","triangle"][Math.floor(Math.random()*3)];
-    if(type==="triangle"){
-      shape.className="shape triangle";
-      shape.style.borderWidth=`${size/2}px ${size/2}px 0 ${size/2}px`;
-      shape.style.borderColor=`${color} transparent transparent transparent`;
-    }else{
-      shape.className=`shape ${type}`;
-      shape.style.width=size+"px";
-      shape.style.height=size+"px";
-      shape.style.background=color;
-    }
-    shape.style.left=Math.random()*innerWidth+"px";
-    shape.style.top=Math.random()*innerHeight+"px";
-    bg.appendChild(shape);
-  }
-}
-document.addEventListener("click",e=>{if(e.target.tagName==="BUTTON") genBG();});
-genBG();
-
-/* Data */
-const modesByGame={
-  Minecraft:["Survival","RPG","PVP","Skyblock","Minigame"],
-  Roblox:["Adventure","RPG","Simulator","Obby","PVP","Tower Defense"]
-};
-let servers=[];
-let currentGame="";
-let currentServerId="";
-let currentMode="";
-
 /* Elements */
 const gameTitle=document.getElementById("gameTitle");
 const modeList=document.getElementById("modeList");
@@ -197,7 +129,6 @@ const detailName=document.getElementById("detailName");
 const detailDesc=document.getElementById("detailDesc");
 const detailExtra=document.getElementById("detailExtra");
 const detailImg=document.getElementById("detailImg");
-
 const addGame=document.getElementById("addGame");
 const addName=document.getElementById("addName");
 const addDesc=document.getElementById("addDesc");
@@ -210,56 +141,48 @@ const rbxLink=document.getElementById("rbxLink");
 const addImg=document.getElementById("addImg");
 const imgPreview=document.getElementById("imgPreview");
 
-// Minecraft
+// Minecraft fields
 const mcExtra=document.getElementById("mcExtra");
 const mcVersion=document.getElementById("mcVersion");
 const mcEdition=document.getElementById("mcEdition");
 const mcRealVersion=document.getElementById("mcRealVersion");
+const deleteBtn=document.getElementById("deleteBtn");
 
-// Delete
-const deleteBtn = document.getElementById("deleteBtn");
+let servers=[];
+let currentGame="", currentMode="", currentServerId="";
+
+const modesByGame={
+  Minecraft:["Survival","RPG","PVP","Skyblock","Minigame"],
+  Roblox:["Adventure","RPG","Simulator","Obby","PVP","Tower Defense"]
+};
 
 /* Navigation */
-function show(p){
-  document.querySelectorAll('.page').forEach(d=>{
-    if(d.id===p) d.classList.remove('hidden');
-    else d.classList.add('hidden');
-  });
-  window.scrollTo(0,0);
-}
+function show(p){document.querySelectorAll('.page').forEach(d=>d.id===p?d.classList.remove('hidden'):d.classList.add('hidden')); window.scrollTo(0,0);}
 window.goPage=n=>show("page"+n);
 window.openAdd=()=>show("addPage");
 
-/* UI */
+/* Choose game & mode */
 window.chooseGame=g=>{
   currentGame=g;
   gameTitle.innerText=g+" : เลือกแนวเกม";
   modeList.innerHTML="";
-  modesByGame[g].forEach(m=>{
-    modeList.innerHTML+=`<div class="card"><button onclick="chooseMode('${m}')">${m}</button></div>`;
-  });
+  modesByGame[g].forEach(m=>{modeList.innerHTML+=`<div class="card"><button onclick="chooseMode('${m}')">${m}</button></div>`;});
   show("page2");
 };
-
 window.chooseMode=m=>{
   currentMode=m;
   renderServers();
   show("page3");
 };
 
-// Render servers dynamically
+/* Render servers */
 function renderServers(){
   serverList.innerHTML="";
   servers.filter(s=>s.game===currentGame && s.modes.includes(currentMode))
     .forEach(s=>{
-      const card = document.createElement("div");
+      const card=document.createElement("div");
       card.className="card";
-      card.innerHTML=`
-        <img src="${s.img}">
-        <button onclick="openDetail('${s.id}')">${s.name}</button>
-        <button class="delete-btn">ลบ</button>
-      `;
-      // Delete button
+      card.innerHTML=`<img src="${s.img}"><button onclick="openDetail('${s.id}')">${s.name}</button><button class="delete-btn">ลบ</button>`;
       card.querySelector(".delete-btn").onclick=()=>deleteServer(s.id);
       serverList.appendChild(card);
     });
@@ -272,55 +195,39 @@ window.openDetail=id=>{
   currentServerId=id;
   detailName.innerText=s.name;
   detailDesc.innerText=s.desc;
-  detailImg.innerHTML = `<img src="${s.img}">`;
+  detailImg.innerHTML=`<img src="${s.img}">`;
   detailExtra.innerHTML=s.game==="Minecraft"
-    ? `<p>PC IP: ${s.pc}</p><p>Phone IP: ${s.phone}</p><p>เวอร์ชัน: ${s.version}</p><p>Edition/แพลตฟอร์ม: ${s.edition}</p><p>เวอร์ชันที่ใช้จริง: ${s.realVersion || "-"}</p>`
+    ? `<p>PC IP: ${s.pc}</p><p>Phone IP: ${s.phone}</p><p>Version: ${s.version}</p><p>Edition: ${s.edition}</p><p>Real Version: ${s.realVersion||"-"}</p>`
     : `<a href="${s.link}" target="_blank"><button>เข้า Roblox</button></a>`;
   show("page4");
 };
 
-// Delete in detail page
-deleteBtn.onclick = ()=>{
-  if(currentServerId && confirm("คุณต้องการลบเซิฟนี้ใช่หรือไม่?")){
-    remove(ref(db, "servers/"+currentServerId));
-    alert("ลบเรียบร้อย");
-    renderServers();
-    show("page1");
-  }
-};
+/* Delete server */
+deleteBtn.onclick = ()=>{if(currentServerId && confirm("คุณต้องการลบเซิฟนี้ใช่หรือไม่?")){remove(ref(db,"servers/"+currentServerId)); renderServers(); show("page1");}};
+function deleteServer(id){if(confirm("คุณต้องการลบเซิฟนี้ใช่หรือไม่?")){remove(ref(db,"servers/"+id)); renderServers();}}
 
-/* ADD SERVER */
+/* Add server */
 window.toggleAdd=()=>{
   const isMC = addGame.value==="Minecraft";
   mcFields.classList.toggle("hidden",!isMC);
   rbxFields.classList.toggle("hidden",addGame.value!=="Roblox");
   mcExtra.classList.toggle("hidden",!isMC);
 };
-
 window.updateAddModes=()=>{
   addModeList.innerHTML="";
   if(!addGame.value) return;
-  modesByGame[addGame.value].forEach(m=>{
-    addModeList.innerHTML+=`<label><input type="checkbox" value="${m}"> ${m}</label>`;
-  });
+  modesByGame[addGame.value].forEach(m=>{addModeList.innerHTML+=`<label><input type="checkbox" value="${m}"> ${m}</label>`;});
 };
-
 addImg.onchange=()=>{
   const f=addImg.files[0];
   if(!f) return;
   const r=new FileReader();
-  r.onload=e=>{
-    imgPreview.innerHTML=`<img src="${e.target.result}">`;
-    imgPreview.dataset.img=e.target.result;
-  };
+  r.onload=e=>{imgPreview.innerHTML=`<img src="${e.target.result}">`; imgPreview.dataset.img=e.target.result;};
   r.readAsDataURL(f);
 };
-
 window.saveServer=()=>{
   const modes=[...addModeList.querySelectorAll("input:checked")].map(c=>c.value);
-  if(!addGame.value||!addName.value||!addDesc.value||!modes.length||!imgPreview.dataset.img)
-    return alert("กรอกข้อมูลให้ครบ");
-
+  if(!addGame.value||!addName.value||!addDesc.value||!modes.length||!imgPreview.dataset.img) return alert("กรอกข้อมูลให้ครบ");
   push(ref(db,"servers"),{
     game:addGame.value,
     name:addName.value,
@@ -330,31 +237,20 @@ window.saveServer=()=>{
     phone:phoneIP.value,
     link:rbxLink.value,
     img:imgPreview.dataset.img,
-    version: addGame.value==="Minecraft" ? mcVersion.value : null,
-    edition: addGame.value==="Minecraft" ? mcEdition.value : null,
-    realVersion: addGame.value==="Minecraft" ? mcRealVersion.value : null
+    version:addGame.value==="Minecraft"?mcVersion.value:null,
+    edition:addGame.value==="Minecraft"?mcEdition.value:null,
+    realVersion:addGame.value==="Minecraft"?mcRealVersion.value:null
   });
-
   alert("บันทึกเรียบร้อย");
   show("page1");
 };
 
-// Delete function
-function deleteServer(id){
-  if(confirm("คุณต้องการลบเซิฟนี้ใช่หรือไม่?")){
-    remove(ref(db,"servers/"+id));
-    alert("ลบเรียบร้อย");
-    renderServers();
-  }
-}
-
-// Firebase real-time listener
+/* Firebase real-time listener */
 onValue(ref(db,"servers"), snap=>{
   servers=[];
-  snap.forEach(c=>servers.push({ id:c.key, ...c.val() }));
+  snap.forEach(c=>servers.push({id:c.key,...c.val()}));
   if(currentGame && currentMode) renderServers();
 });
-
 </script>
 </body>
 </html>
