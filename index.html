@@ -222,7 +222,22 @@ input,select,textarea{
 
 </div>
 
-<script>
+<script type="module">
+  /* ===== FIREBASE ===== */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBcs3Owrnp3doAgLpT84ieIZZ-RL8XA8zs",
+  authDomain: "gamesevers-5421f.firebaseapp.com",
+  databaseURL: "https://gamesevers-5421f-default-rtdb.firebaseio.com",
+  projectId: "gamesevers-5421f"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const bg = document.getElementById("bg");
+
 /* ===== BACKGROUND RANDOM SHAPES ===== */
 function genBG(){
   bg.innerHTML="";
@@ -263,6 +278,13 @@ const modesByGame={
   Roblox:["Adventure","RPG","Simulator","Obby","PVP","Tower Defense"]
 };
 let servers=[],currentGame="";
+
+onValue(ref(db,"servers"), snap=>{
+  servers=[];
+  snap.forEach(c=>{
+    servers.push(c.val());
+  });
+});
 
 function show(p){
   document.querySelectorAll('.container>div').forEach(d=>d.classList.add('hidden'));
@@ -333,7 +355,7 @@ function saveServer(){
   if(!addGame.value||!addName.value||!addDesc.value||!modes.length||!imgPreview.dataset.img)
     return alert("กรอกข้อมูลให้ครบ");
 
-  servers.push({
+  push(ref(db,"servers"),{
     game:addGame.value,
     name:addName.value,
     desc:addDesc.value,
