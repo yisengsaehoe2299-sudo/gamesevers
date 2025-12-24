@@ -192,7 +192,14 @@ window.chooseGame=g=>{
 window.chooseMode=m=>{
   currentMode=m;
   serverTitle.innerText=currentGame+" : "+currentMode;
-  filterContainer.classList.toggle("hidden", currentGame!=="Minecraft");
+
+  // แสดง Filter เฉพาะ Minecraft
+  if(currentGame==="Minecraft"){
+    filterContainer.classList.remove("hidden");
+  } else {
+    filterContainer.classList.add("hidden");
+  }
+
   renderServers();
   show("page3");
 };
@@ -274,7 +281,6 @@ window.saveServer=()=>{
   push(ref(db,"servers"), serverData).then(()=>{
     alert("บันทึกเรียบร้อย");
     show("page1");
-    // Reset form
     addName.value = addDesc.value = pcIP.value = phoneIP.value = rbxLink.value = mcRealVersion.value = "";
     addModeList.innerHTML = "";
     imgPreview.innerHTML = "ยังไม่ได้เลือกรูป";
