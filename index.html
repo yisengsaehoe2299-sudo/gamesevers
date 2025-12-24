@@ -56,7 +56,7 @@ input,select,textarea{width:100%;padding:10px;margin-bottom:10px;border-radius:8
 <!-- เลือกเซิฟ -->
 <div id="page3" class="page hidden">
   <button class="back" onclick="goPage(2)">← ย้อนกลับ</button>
-  <h2>เลือกเซิร์ฟเวอร์</h2>
+  <h2 id="serverTitle"></h2>
   <div id="filterContainer" class="filter-box hidden">
     <label>เวอร์ชัน:
       <select id="filterVersion" onchange="renderServers()">
@@ -141,6 +141,7 @@ const db = getDatabase(app);
 
 /* Elements */
 const gameTitle=document.getElementById("gameTitle");
+const serverTitle=document.getElementById("serverTitle");
 const modeList=document.getElementById("modeList");
 const serverList=document.getElementById("serverList");
 const detailName=document.getElementById("detailName");
@@ -190,6 +191,7 @@ window.chooseGame=g=>{
 };
 window.chooseMode=m=>{
   currentMode=m;
+  serverTitle.innerText=currentGame+" : "+currentMode;
   filterContainer.classList.toggle("hidden", currentGame!=="Minecraft");
   renderServers();
   show("page3");
