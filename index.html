@@ -70,6 +70,7 @@ button{
   align-items:center;
   justify-content:center;
   font-size:32px;
+  line-height:1;
 }
 
 input,select,textarea{
@@ -87,11 +88,15 @@ input,select,textarea{
   border-radius:10px;
   margin-bottom:10px;
 }
+
+/* 🔥 FIX checkbox ชิดซ้าย 100% */
 #addModeList label{
   display:grid;
   grid-template-columns:18px 1fr;
+  align-items:center;
   gap:8px;
   margin:6px 0;
+  cursor:pointer;
 }
 
 .preview{
@@ -125,28 +130,31 @@ input,select,textarea{
   <h2>เลือกเกม</h2>
   <div class="grid">
     <div class="card">
-      <img src="Minecraft_F.png" alt="">
+      <img src="Minecraft_F.png" alt="Minecraft">
       <button onclick="chooseGame('Minecraft')">Minecraft</button>
     </div>
     <div class="card">
-      <img src="Roblox_F.png" alt="">
+      <img src="Roblox_F.png" alt="Roblox">
       <button onclick="chooseGame('Roblox')">Roblox</button>
     </div>
   </div>
 </div>
 
+<!-- เลือกแนว -->
 <div id="page2" class="hidden">
   <button class="back" onclick="goPage(1)">← ย้อนกลับ</button>
   <h2 id="gameTitle"></h2>
   <div class="grid" id="modeList"></div>
 </div>
 
+<!-- เลือกเซิร์ฟ -->
 <div id="page3" class="hidden">
   <button class="back" onclick="goPage(2)">← ย้อนกลับ</button>
   <h2>เลือกเซิร์ฟเวอร์</h2>
   <div class="grid" id="serverList"></div>
 </div>
 
+<!-- รายละเอียด -->
 <div id="page4" class="hidden">
   <button class="back" onclick="goPage(3)">← ย้อนกลับ</button>
   <h2 id="detailName"></h2>
@@ -173,7 +181,6 @@ input,select,textarea{
     <div id="addModeList"></div>
   </div>
 
-  <!-- 🔥 อัปโหลดรูปปก -->
   <b>รูปปกเซิร์ฟเวอร์ *</b>
   <div class="preview" id="imgPreview">ยังไม่ได้เลือกรูป</div>
   <input type="file" accept="image/*" id="addImg">
@@ -193,10 +200,12 @@ input,select,textarea{
 </div>
 
 <script>
+/* 🔥 เพิ่ม Tower Defense ให้ Roblox แล้ว */
 const modesByGame={
   Minecraft:["Survival","RPG","PVP","Skyblock","Minigame"],
-  Roblox:["Adventure","RPG","Simulator","Obby","PVP"]
+  Roblox:["Adventure","RPG","Simulator","Obby","PVP","Tower Defense"]
 };
+
 let servers=[],currentGame="";
 
 function show(p){
@@ -208,24 +217,28 @@ const openAdd=()=>show("addPage");
 
 function chooseGame(g){
   currentGame=g;
-  gameTitle.innerText=g;
+  gameTitle.innerText=g+" : เลือกแนวเกม";
   modeList.innerHTML="";
   modesByGame[g].forEach(m=>{
-    modeList.innerHTML+=`<div class="card"><button onclick="chooseMode('${m}')">${m}</button></div>`;
+    modeList.innerHTML+=`
+      <div class="card">
+        <button onclick="chooseMode('${m}')">${m}</button>
+      </div>`;
   });
   show("page2");
 }
 
 function chooseMode(m){
   serverList.innerHTML="";
-  servers.filter(s=>s.game===currentGame && s.modes.includes(m))
-    .forEach(s=>{
-      serverList.innerHTML+=`
-        <div class="card">
-          <img src="${s.img}">
-          <button onclick="openDetail(${servers.indexOf(s)})">${s.name}</button>
-        </div>`;
-    });
+  const list=servers.filter(s=>s.game===currentGame && s.modes.includes(m));
+  if(!list.length) serverList.innerHTML="<p>(ยังไม่มีเซิร์ฟเวอร์)</p>";
+  list.forEach(s=>{
+    serverList.innerHTML+=`
+      <div class="card">
+        <img src="${s.img}">
+        <button onclick="openDetail(${servers.indexOf(s)})">${s.name}</button>
+      </div>`;
+  });
   show("page3");
 }
 
@@ -252,7 +265,7 @@ function updateAddModes(){
   });
 }
 
-/* 🔥 preview รูป */
+/* preview รูป */
 addImg.onchange=()=>{
   const f=addImg.files[0];
   if(!f) return;
