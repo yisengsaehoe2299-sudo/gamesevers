@@ -223,7 +223,7 @@ input,select,textarea{
 </div>
 
 <script type="module">
-  /* ===== FIREBASE ===== */
+/* ===== FIREBASE ===== */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
@@ -236,9 +236,9 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const bg = document.getElementById("bg");
 
-/* ===== BACKGROUND RANDOM SHAPES ===== */
+/* ===== BACKGROUND ===== */
+const bg = document.getElementById("bg");
 function genBG(){
   bg.innerHTML="";
   const count=Math.floor(Math.random()*6)+4;
@@ -247,7 +247,6 @@ function genBG(){
     const size=Math.random()*160+60;
     const color=`hsl(${Math.random()*360},70%,60%)`;
     const type=["circle","square","triangle"][Math.floor(Math.random()*3)];
-
     if(type==="triangle"){
       shape.className="shape triangle";
       shape.style.borderWidth=`${size/2}px ${size/2}px 0 ${size/2}px`;
@@ -258,42 +257,43 @@ function genBG(){
       shape.style.height=size+"px";
       shape.style.background=color;
     }
-
     shape.style.left=Math.random()*innerWidth+"px";
     shape.style.top=Math.random()*innerHeight+"px";
     bg.appendChild(shape);
   }
 }
-
-/* เปลี่ยนทุกครั้งที่กดปุ่ม */
 document.addEventListener("click",e=>{
   if(e.target.tagName==="BUTTON") genBG();
 });
-
 genBG();
 
-/* ===== APP LOGIC ===== */
+/* ===== DATA ===== */
 const modesByGame={
   Minecraft:["Survival","RPG","PVP","Skyblock","Minigame"],
   Roblox:["Adventure","RPG","Simulator","Obby","PVP","Tower Defense"]
 };
-let servers=[],currentGame="";
 
+let servers=[];
+let currentGame="";
+
+/* ===== LOAD FROM FIREBASE ===== */
 onValue(ref(db,"servers"), snap=>{
   servers=[];
   snap.forEach(c=>{
-    servers.push(c.val());
+    servers.push({ id:c.key, ...c.val() });
   });
 });
 
+/* ===== NAV ===== */
 function show(p){
   document.querySelectorAll('.container>div').forEach(d=>d.classList.add('hidden'));
   document.getElementById(p).classList.remove('hidden');
 }
-const goPage=n=>show("page"+n);
-const openAdd=()=>show("addPage");
+window.goPage=n=>show("page"+n);
+window.openAdd=()=>show("addPage");
 
-function chooseGame(g){
+/* ===== UI ===== */
+window.chooseGame=function(g){
   currentGame=g;
   gameTitle.innerText=g+" : เลือกแนวเกม";
   modeList.innerHTML="";
@@ -301,43 +301,46 @@ function chooseGame(g){
     modeList.innerHTML+=`<div class="card"><button onclick="chooseMode('${m}')">${m}</button></div>`;
   });
   show("page2");
-}
+};
 
-function chooseMode(m){
+window.chooseMode=function(m){
   serverList.innerHTML="";
-  servers.filter(s=>s.game===currentGame && s.modes.includes(m))
-    .forEach((s,i)=>{
+  servers
+    .filter(s=>s.game===currentGame && s.modes.includes(m))
+    .forEach(s=>{
       serverList.innerHTML+=`
       <div class="card">
         <img src="${s.img}">
-        <button onclick="openDetail(${i})">${s.name}</button>
+        <button onclick="openDetail('${s.id}')">${s.name}</button>
       </div>`;
     });
   show("page3");
-}
+};
 
-function openDetail(i){
-  const s=servers[i];
+window.openDetail=function(id){
+  const s=servers.find(x=>x.id===id);
+  if(!s) return;
   detailName.innerText=s.name;
   detailDesc.innerText=s.desc;
   detailExtra.innerHTML=s.game==="Minecraft"
     ? `<p>PC IP: ${s.pc}</p><p>Phone IP: ${s.phone}</p>`
     : `<a href="${s.link}" target="_blank"><button>เข้า Roblox</button></a>`;
   show("page4");
-}
+};
 
-function toggleAdd(){
+/* ===== ADD ===== */
+window.toggleAdd=function(){
   mcFields.classList.toggle("hidden",addGame.value!=="Minecraft");
   rbxFields.classList.toggle("hidden",addGame.value!=="Roblox");
-}
+};
 
-function updateAddModes(){
+window.updateAddModes=function(){
   addModeList.innerHTML="";
   if(!addGame.value) return;
   modesByGame[addGame.value].forEach(m=>{
     addModeList.innerHTML+=`<label><input type="checkbox" value="${m}"> ${m}</label>`;
   });
-}
+};
 
 addImg.onchange=()=>{
   const f=addImg.files[0];
@@ -350,7 +353,7 @@ addImg.onchange=()=>{
   r.readAsDataURL(f);
 };
 
-function saveServer(){
+window.saveServer=function(){
   const modes=[...addModeList.querySelectorAll("input:checked")].map(c=>c.value);
   if(!addGame.value||!addName.value||!addDesc.value||!modes.length||!imgPreview.dataset.img)
     return alert("กรอกข้อมูลให้ครบ");
@@ -365,8 +368,10 @@ function saveServer(){
     link:rbxLink.value,
     img:imgPreview.dataset.img
   });
+
+  alert("บันทึกเรียบร้อย");
   show("page1");
-}
+};
 </script>
 
 </body>
