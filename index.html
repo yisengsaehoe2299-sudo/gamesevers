@@ -66,6 +66,7 @@ header{
   width:200px;
   transition: transform .2s, box-shadow .2s;
   margin-bottom:20px;
+  position:relative;
 }
 .card:hover{
   transform: scale(1.05);
@@ -93,6 +94,15 @@ button{
 }
 button:hover{background:#0353e9}
 .back{margin-bottom:15px;background:#444}
+
+/* ===== DELETE BUTTON ===== */
+.delete-btn{
+  background:#e63946;
+  margin-top:6px;
+}
+.delete-btn:hover{
+  background:#a4161a;
+}
 
 /* ===== ADD BUTTON ===== */
 .add-btn{
@@ -212,6 +222,7 @@ input,select,textarea{
   <h2 id="detailName"></h2>
   <p id="detailDesc"></p>
   <div id="detailExtra"></div>
+  <button class="delete-btn" id="deleteBtn">ลบเซิร์ฟนี้</button>
 </div>
 
 <!-- เพิ่มเซิฟ -->
@@ -225,20 +236,46 @@ input,select,textarea{
   </select>
   <input id="addName" placeholder="ชื่อเซิร์ฟ">
   <textarea id="addDesc" placeholder="คำอธิบาย"></textarea>
+
+  <!-- แนวเกม -->
   <div class="mode-box">
     <b>แนวเกม</b>
     <div id="addModeList"></div>
   </div>
+
+  <!-- สำหรับ Minecraft เพิ่ม -->
+  <div id="mcExtra" class="hidden">
+    <b>เวอร์ชันเกม</b>
+    <select id="mcVersion">
+      <option value="original">ของแท้เท่านั้น</option>
+      <option value="both">ทั้งแท้และเถื่อน</option>
+    </select>
+
+    <b>Edition / แพลตฟอร์ม</b>
+    <select id="mcEdition">
+      <option value="java">Java</option>
+      <option value="bedrock">Bedrock / แบคล๊อก</option>
+      <option value="both">ทั้งสอง</option>
+    </select>
+
+    <b>เวอร์ชันที่ใช้</b>
+    <input id="mcRealVersion" placeholder="เช่น 1.20.1">
+  </div>
+
+  <!-- รูปปก -->
   <b>รูปปกเซิร์ฟ</b>
   <div class="preview" id="imgPreview">ยังไม่ได้เลือกรูป</div>
   <input type="file" accept="image/*" id="addImg">
+
   <div id="mcFields" class="hidden">
     <input id="pcIP" placeholder="PC IP">
     <input id="phoneIP" placeholder="Phone IP">
   </div>
+
   <div id="rbxFields" class="hidden">
     <input id="rbxLink" placeholder="ลิงก์ Roblox">
   </div>
+
   <button onclick="saveServer()">บันทึก</button>
 </div>
 
@@ -246,7 +283,7 @@ input,select,textarea{
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 /* ===== FIREBASE ===== */
 const firebaseConfig = {
@@ -293,6 +330,7 @@ const modesByGame={
 };
 let servers=[];
 let currentGame="";
+let currentServerId="";
 
 /* ===== LOAD SERVERS ===== */
 onValue(ref(db,"servers"), snap=>{
@@ -320,6 +358,15 @@ const rbxLink=document.getElementById("rbxLink");
 const addImg=document.getElementById("addImg");
 const imgPreview=document.getElementById("imgPreview");
 
+// สำหรับ Minecraft
+const mcExtra = document.getElementById("mcExtra");
+const mcVersion = document.getElementById("mcVersion");
+const mcEdition = document.getElementById("mcEdition");
+const mcRealVersion = document.getElementById("mcRealVersion");
+
+// ปุ่มลบ
+const deleteBtn = document.getElementById("deleteBtn");
+
 /* ===== NAVIGATION ===== */
 function show(p){
   document.querySelectorAll('.page').forEach(d=>{
@@ -346,11 +393,22 @@ window.chooseMode=m=>{
   serverList.innerHTML="";
   servers.filter(s=>s.game===currentGame && s.modes.includes(m))
     .forEach(s=>{
-      const h = 150 + Math.floor(Math.random()*80); // ความสูงสุ่ม
+      const h = 220; // เพิ่มความสูงเพราะมีคำอธิบาย
+      let extraHTML = "";
+      if(s.game==="Minecraft"){
+        extraHTML = `<p>${s.desc}</p>
+          <p>เวอร์ชัน: ${s.version}</p>
+          <p>Edition/แพลตฟอร์ม: ${s.edition}</p>
+          <p>เวอร์ชันที่ใช้จริง: ${s.realVersion || "-"}</p>`;
+      } else {
+        extraHTML = `<p>${s.desc}</p>`;
+      }
       serverList.innerHTML+=`
       <div class="card" style="height:${h}px">
         <img src="${s.img}">
         <button onclick="openDetail('${s.id}')">${s.name}</button>
+        ${extraHTML}
+        <button class="delete-btn" onclick="deleteServer('${s.id}')">ลบ</button>
       </div>`;
     });
   show("page3");
@@ -359,19 +417,32 @@ window.chooseMode=m=>{
 window.openDetail=id=>{
   const s=servers.find(x=>x.id===id);
   if(!s) return;
+  currentServerId = id;
   detailName.innerText=s.name;
   detailDesc.innerText=s.desc;
   detailExtra.innerHTML=s.game==="Minecraft"
-    ? `<p>PC IP: ${s.pc}</p><p>Phone IP: ${s.phone}</p>`
+    ? `<p>PC IP: ${s.pc}</p><p>Phone IP: ${s.phone}</p><p>เวอร์ชัน: ${s.version}</p><p>Edition/แพลตฟอร์ม: ${s.edition}</p><p>เวอร์ชันที่ใช้จริง: ${s.realVersion || "-"}</p>`
     : `<a href="${s.link}" target="_blank"><button>เข้า Roblox</button></a>`;
   show("page4");
 };
 
+// ลบเซิฟจากหน้า Detail
+deleteBtn.onclick = ()=>{
+  if(currentServerId && confirm("คุณต้องการลบเซิฟนี้ใช่หรือไม่?")){
+    remove(ref(db, "servers/"+currentServerId));
+    alert("ลบเรียบร้อย");
+    show("page1");
+  }
+};
+
 /* ===== ADD SERVER ===== */
 window.toggleAdd=()=>{
-  mcFields.classList.toggle("hidden",addGame.value!=="Minecraft");
+  const isMC = addGame.value==="Minecraft";
+  mcFields.classList.toggle("hidden",!isMC);
   rbxFields.classList.toggle("hidden",addGame.value!=="Roblox");
+  mcExtra.classList.toggle("hidden",!isMC);
 };
+
 window.updateAddModes=()=>{
   addModeList.innerHTML="";
   if(!addGame.value) return;
@@ -379,6 +450,7 @@ window.updateAddModes=()=>{
     addModeList.innerHTML+=`<label><input type="checkbox" value="${m}"> ${m}</label>`;
   });
 };
+
 addImg.onchange=()=>{
   const f=addImg.files[0];
   if(!f) return;
@@ -389,6 +461,7 @@ addImg.onchange=()=>{
   };
   r.readAsDataURL(f);
 };
+
 window.saveServer=()=>{
   const modes=[...addModeList.querySelectorAll("input:checked")].map(c=>c.value);
   if(!addGame.value||!addName.value||!addDesc.value||!modes.length||!imgPreview.dataset.img)
@@ -402,10 +475,23 @@ window.saveServer=()=>{
     pc:pcIP.value,
     phone:phoneIP.value,
     link:rbxLink.value,
-    img:imgPreview.dataset.img
+    img:imgPreview.dataset.img,
+    version: addGame.value==="Minecraft" ? mcVersion.value : null,
+    edition: addGame.value==="Minecraft" ? mcEdition.value : null,
+    realVersion: addGame.value==="Minecraft" ? mcRealVersion.value : null
   });
+
   alert("บันทึกเรียบร้อย");
   show("page1");
+};
+
+// ลบเซิฟจากหน้า Mode List
+window.deleteServer=id=>{
+  if(confirm("คุณต้องการลบเซิฟนี้ใช่หรือไม่?")){
+    remove(ref(db,"servers/"+id));
+    alert("ลบเรียบร้อย");
+    chooseMode(""); // รีโหลดหน้า
+  }
 };
 </script>
 </body>
