@@ -12,37 +12,46 @@ body{background:#0b0b0f;color:#fff;min-height:100vh;display:flex;flex-direction:
 header{padding:30px 20px;text-align:center;font-size:32px;font-weight:bold;background: linear-gradient(to bottom, #14141c, #0b0b0f); border-bottom: 1px solid #2a2a38;}
 
 .container{
-  max-width:1200px;
+  max-width:1100px;
   width: 100%;
   margin:0 auto;
   padding:20px;
   flex-grow: 1;
 }
 
-/* แก้ไขระบบ Grid ให้เรียงต่อกัน ไม่ทับกัน */
+/* แก้ไข Grid: บังคับแถวละ 3 คอลัมน์สำหรับหน้าจอใหญ่ */
 .grid{
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* ปรับขนาดขั้นต่ำให้กว้างขึ้นเล็กน้อย */
-  gap: 20px;
+  /* ใช้ repeat(3, 1fr) เพื่อให้ 1,2,3 เรียง ซ้าย กลาง ขวา */
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 25px;
   width: 100%;
   padding: 20px 0;
 }
 
-/* Card ดีไซน์ใหม่ แก้ไขปัญหาความสูง */
+/* ปรับให้รองรับมือถือ (เหลือแถวละ 1 หรือ 2 ตามความเหมาะสม) */
+@media (max-width: 900px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
+  .grid { grid-template-columns: 1fr; }
+}
+
+/* Card ดีไซน์ */
 .card{
   background:#14141c;
   border-radius:20px;
-  padding:20px;
+  padding:18px;
   text-align:center;
   transition: all 0.3s ease;
   border: 1px solid #2a2a38;
   display: flex;
-  flex-direction: column; /* จัดองค์ประกอบในแนวตั้ง */
-  height: 100%; /* ให้ Card ทุกใบสูงเท่ากันในแถวเดียวกัน */
+  flex-direction: column;
+  height: 100%;
 }
 .card:hover{
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.5);
   border-color: #4f7cff;
 }
 
@@ -50,25 +59,22 @@ header{padding:30px 20px;text-align:center;font-size:32px;font-weight:bold;backg
   width:100%;
   height:180px;
   object-fit:cover;
-  border-radius:12px;
+  border-radius:14px;
   margin-bottom:15px;
   background:#000;
-  flex-shrink: 0; /* ป้องกันรูปโดนบีบ */
 }
 
 .card h3 {
   margin-bottom: 15px;
   font-size: 1.1rem;
-  word-break: break-word; /* ป้องกันชื่อยาวเกินจนล้นการ์ด */
 }
 
-/* ดันปุ่มไปไว้ล่างสุดของการ์ดเสมอ */
 .card-btn {
-  margin-top: auto; 
+  margin-top: auto; /* ดันปุ่มลงล่างสุด */
   width:100%;
-  padding:12px;
+  padding:13px;
   border:none;
-  border-radius:10px;
+  border-radius:12px;
   background:#4f7cff;
   color:#fff;
   cursor:pointer;
@@ -77,36 +83,34 @@ header{padding:30px 20px;text-align:center;font-size:32px;font-weight:bold;backg
 }
 .card-btn:hover{background:#0353e9;}
 
-/* อื่นๆ */
-button.back{
-  margin-bottom:20px;
+.back{
+  margin-bottom:25px;
   background:#2a2a38;
-  color: white;
-  border: none;
+  color:#fff;
+  border:none;
   padding: 10px 25px;
   border-radius: 8px;
   cursor: pointer;
 }
 
-.delete-btn{background:#e63946; margin-top:15px; padding: 12px; border:none; color:white; border-radius:10px; cursor:pointer; width:100%;}
+.delete-btn{background:#e63946; margin-top:15px; padding: 12px; border:none; color:#fff; border-radius:10px; cursor:pointer;}
 .add-btn{
-  position:fixed; bottom:30px; right:30px; width:60px; height:60px;
+  position:fixed; bottom:30px; right:30px; width:65px; height:65px;
   border-radius:50%; background:#ff4f8b; color:#fff; border:none;
-  cursor:pointer; z-index:100; font-size:30px; box-shadow: 0 5px 15px rgba(255, 79, 139, 0.4);
+  cursor:pointer; z-index:100; font-size:35px; box-shadow: 0 5px 15px rgba(255, 79, 139, 0.4);
 }
 
 input,select,textarea{ width:100%; padding:12px; margin-bottom:15px; border-radius:10px; border:1px solid #333; background: #1b1b26; color: #fff; }
 .hidden{display:none !important;}
 
 .filter-box{
-  margin-bottom: 20px; padding:20px; background:#14141c; border-radius:15px;
-  display:none; gap:15px; flex-wrap: wrap; justify-content:center; border: 1px solid #2a2a38;
+  margin-bottom: 25px; padding:20px; background:#14141c; border-radius:15px;
+  display:none; gap:20px; justify-content:center; border: 1px solid #2a2a38;
 }
-.filter-box label{ font-size: 14px; color: #888; }
-.filter-box select{ width: auto; min-width: 140px; margin: 5px 0 0 0; border-color: #4f7cff; }
+.filter-box select{ width: 150px; border-color: #4f7cff; margin-top:5px; }
 
-.page { width: 100%; animation: fadeIn 0.3s ease-in; }
-@keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+.page { width: 100%; animation: fadeIn 0.4s; }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
 </style>
 </head>
 <body>
@@ -120,12 +124,12 @@ input,select,textarea{ width:100%; padding:12px; margin-bottom:15px; border-radi
     <div class="grid">
       <div class="card">
         <img src="Minecraft_F.png" alt="Minecraft">
-        <h3 style="margin-top:10px;">Minecraft</h3>
+        <h3>Minecraft</h3>
         <button class="card-btn" onclick="chooseGame('Minecraft')">เลือก</button>
       </div>
       <div class="card">
         <img src="Roblox_F.png" alt="Roblox">
-        <h3 style="margin-top:10px;">Roblox</h3>
+        <h3>Roblox</h3>
         <button class="card-btn" onclick="chooseGame('Roblox')">เลือก</button>
       </div>
     </div>
@@ -164,12 +168,12 @@ input,select,textarea{ width:100%; padding:12px; margin-bottom:15px; border-radi
 
   <div id="page4" class="page hidden">
     <button class="back" onclick="goPage(3)">← ย้อนกลับ</button>
-    <div style="max-width:700px; width:100%; margin:auto;">
+    <div style="max-width:650px; width:100%; margin:auto;">
       <h2 id="detailName" style="text-align:center; margin-bottom:20px;"></h2>
       <div class="card" style="cursor:default;">
-        <img id="detailImgTag" src="" style="height:auto; max-height:400px;">
+        <img id="detailImgTag" src="" style="height:auto;">
         <div id="detailExtra" style="text-align:left; margin: 15px 0; background:#0b0b0f; padding:20px; border-radius:15px; border:1px solid #333;"></div>
-        <p id="detailDesc" style="color:#aaa; line-height:1.6; margin-bottom:20px; text-align:left; white-space: pre-line;"></p>
+        <p id="detailDesc" style="color:#aaa; line-height:1.6; margin-bottom:20px; text-align:left; white-space:pre-wrap;"></p>
         <button class="delete-btn" id="deleteBtn">ลบเซิฟเวอร์นี้ออกจากระบบ</button>
       </div>
     </div>
@@ -178,7 +182,7 @@ input,select,textarea{ width:100%; padding:12px; margin-bottom:15px; border-radi
   <div id="addPage" class="page hidden">
     <button class="back" onclick="goPage(1)">← ย้อนกลับ</button>
     <h2 style="text-align:center; margin-bottom:25px;">ลงประกาศเซิร์ฟเวอร์</h2>
-    <div style="max-width: 500px; width:100%; margin:auto; background:#14141c; padding:25px; border-radius:20px; border: 1px solid #2a2a38;">
+    <div style="max-width: 500px; width:100%; margin:auto; background:#14141c; padding:25px; border-radius:20px;">
       <select id="addGame" onchange="updateAddModes();toggleAdd()">
         <option value="">-- เลือกเกม --</option>
         <option>Minecraft</option>
@@ -188,7 +192,7 @@ input,select,textarea{ width:100%; padding:12px; margin-bottom:15px; border-radi
       <textarea id="addDesc" rows="4" placeholder="รายละเอียด/ช่องทางติดต่อ"></textarea>
 
       <div style="background:#1b1b26; padding:15px; border-radius:12px; margin-bottom:15px;">
-        <b style="display:block; margin-bottom:10px;">เลือกแนวเกม (เลือกได้อย่างน้อย 1)</b>
+        <b style="display:block; margin-bottom:10px;">เลือกแนวเกม</b>
         <div id="addModeList"></div>
       </div>
 
@@ -208,7 +212,7 @@ input,select,textarea{ width:100%; padding:12px; margin-bottom:15px; border-radi
       <input type="file" accept="image/*" id="addImg" style="margin-top:10px;">
       <div id="imgPreview" style="margin-top:10px; text-align:center;"></div>
       
-      <button onclick="saveServer()" style="margin-top:20px; background:#27ae60; color:white; border:none; padding:15px; width:100%; border-radius:10px; font-weight:bold; cursor:pointer;">บันทึกข้อมูลและลงประกาศ</button>
+      <button onclick="saveServer()" style="margin-top:20px; background:#27ae60; color:#fff; border:none; padding:15px; border-radius:10px; width:100%; cursor:pointer; font-weight:bold;">บันทึกข้อมูล</button>
     </div>
   </div>
 
@@ -252,7 +256,7 @@ const modesByGame={
   Roblox:["Adventure","RPG","Simulator","Obby","PVP","Tower Defense"]
 };
 
-/* Navigation Logic */
+/* Logic */
 window.show=(p)=>{
     document.querySelectorAll('.page').forEach(d=>d.classList.add('hidden'));
     document.getElementById(p).classList.remove('hidden');
@@ -268,7 +272,7 @@ window.chooseGame=g=>{
   modesByGame[g].forEach(m=>{
     const d = document.createElement('div');
     d.className = 'card';
-    d.innerHTML = `<h3>${m}</h3><button class="card-btn" onclick="chooseMode('${m}')">เลือกแนวนนี้</button>`;
+    d.innerHTML = `<h3>${m}</h3><button class="card-btn" onclick="chooseMode('${m}')">เลือก</button>`;
     modeList.appendChild(d);
   });
   show("page2");
@@ -282,7 +286,6 @@ window.chooseMode=m=>{
   show("page3");
 };
 
-/* Render List Logic */
 window.renderServers = () => {
   serverList.innerHTML="";
   let filtered = servers.filter(s=>s.game===currentGame && Array.isArray(s.modes) && s.modes.includes(currentMode));
@@ -293,7 +296,7 @@ window.renderServers = () => {
   }
 
   if(filtered.length === 0) {
-    serverList.innerHTML = "<div style='grid-column: 1/-1; text-align:center; padding:100px 0; color:#555;'>ยังไม่มีการประกาศในขณะนี้</div>";
+    serverList.innerHTML = "<div style='grid-column: 1/-1; text-align:center; padding:60px; color:#555;'>ไม่มีข้อมูลเซิร์ฟเวอร์ในขณะนี้</div>";
     return;
   }
 
@@ -321,27 +324,26 @@ window.openDetail=id=>{
     detailExtra.innerHTML = `
       <p><b>Version:</b> ${s.realVersion||"-"}</p>
       <p><b>ระบบ:</b> ${s.version==="original"?"แท้เท่านั้น":"แท้/เถื่อน"}</p>
-      <p><b>Edition:</b> ${s.edition ? s.edition.toUpperCase() : "-"}</p>
+      <p><b>Edition:</b> ${s.edition.toUpperCase()}</p>
       <hr style="margin:15px 0; border:0; border-top:1px solid #333;">
       <p><b>IP (PC):</b> <span style="color:#4f7cff">${s.pc||"-"}</span></p>
       <p><b>IP (Phone):</b> <span style="color:#4f7cff">${s.phone||"-"}</span></p>
     `;
   } else {
-    detailExtra.innerHTML = `<a href="${s.link}" target="_blank" style="text-decoration:none;"><button class="card-btn" style="background:#00c2ff;">เข้าเล่นผ่าน Roblox</button></a>`;
+    detailExtra.innerHTML = `<a href="${s.link}" target="_blank"><button class="card-btn" style="background:#00c2ff;">เข้าเล่นผ่าน Roblox</button></a>`;
   }
   show("page4");
 };
 
 deleteBtn.onclick = () => {
-  if(confirm("ยืนยันการลบข้อมูลนี้ออกจากระบบ?")){
+  if(confirm("ยืนยันการลบ?")){
     remove(ref(db,"servers/"+currentServerId)).then(()=>{
-      alert("ลบข้อมูลเรียบร้อย");
+      alert("ลบสำเร็จ");
       show("page1");
     });
   }
 };
 
-/* Form & Data Logic */
 window.toggleAdd=()=>{
   mcExtra.classList.toggle("hidden", addGame.value!=="Minecraft");
   rbxFields.classList.toggle("hidden", addGame.value!=="Roblox");
@@ -353,8 +355,6 @@ window.updateAddModes=()=>{
   modesByGame[addGame.value].forEach(m=>{
     const l = document.createElement('label');
     l.style.display = "block";
-    l.style.margin = "8px 0";
-    l.style.cursor = "pointer";
     l.innerHTML = `<input type="checkbox" value="${m}" style="width:auto; margin-right:10px;"> ${m}`;
     addModeList.appendChild(l);
   });
@@ -366,14 +366,14 @@ addImg.onchange=()=>{
   const r=new FileReader();
   r.onload=e=>{
     base64Img = e.target.result;
-    imgPreview.innerHTML=`<img src="${base64Img}" style="width:100%; border-radius:10px; margin-top:10px; border: 1px solid #333;">`;
+    imgPreview.innerHTML=`<img src="${base64Img}" style="width:100%; border-radius:10px; margin-top:10px;">`;
   };
   r.readAsDataURL(f);
 };
 
 window.saveServer=()=>{
   const modes=[...addModeList.querySelectorAll("input:checked")].map(c=>c.value);
-  if(!addGame.value||!addName.value||modes.length===0||!base64Img) return alert("กรุณากรอกข้อมูลและอัปโหลดรูปภาพให้ครบถ้วน");
+  if(!addGame.value||!addName.value||modes.length===0||!base64Img) return alert("กรุณากรอกข้อมูลให้ครบ");
 
   const serverData = {
     game:addGame.value, name:addName.value, desc:addDesc.value, modes:modes, img:base64Img,
@@ -384,12 +384,11 @@ window.saveServer=()=>{
   };
 
   push(ref(db,"servers"), serverData).then(()=>{
-    alert("ลงประกาศสำเร็จแล้ว!");
+    alert("ลงประกาศสำเร็จ!");
     location.reload();
   });
 };
 
-/* Firebase Sync */
 onValue(ref(db,"servers"), snap=>{
   servers=[];
   snap.forEach(c=>servers.push({id:c.key,...c.val()}));
