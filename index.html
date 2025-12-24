@@ -9,129 +9,104 @@
 *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif}
 body{background:#0b0b0f;color:#fff;min-height:100vh;display:flex;flex-direction:column;}
 
-header{padding:30px 20px;text-align:center;font-size:32px;font-weight:bold;background: linear-gradient(to bottom, #14141c, #0b0b0f);}
+header{padding:30px 20px;text-align:center;font-size:32px;font-weight:bold;background: linear-gradient(to bottom, #14141c, #0b0b0f); border-bottom: 1px solid #2a2a38;}
 
-/* Container หลักต้องยืดขยายได้ */
 .container{
   max-width:1200px;
   width: 100%;
   margin:0 auto;
   padding:20px;
-  flex-grow: 1; /* ให้พื้นที่ยืดตามเนื้อหา */
-  display:flex;
-  flex-direction:column;
-  align-items:center;
+  flex-grow: 1;
 }
 
-/* แก้ไขระบบ Grid ให้รองรับการขยายตัวและไม่ทับกัน */
+/* แก้ไขระบบ Grid ให้เรียงต่อกัน ไม่ทับกัน */
 .grid{
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); /* ปรับขนาดอัตโนมัติ */
-  gap: 25px; /* เว้นระยะห่างทุกด้าน */
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* ปรับขนาดขั้นต่ำให้กว้างขึ้นเล็กน้อย */
+  gap: 20px;
   width: 100%;
   padding: 20px 0;
-  align-items: start;
 }
 
-/* Card ดีไซน์ใหม่ */
+/* Card ดีไซน์ใหม่ แก้ไขปัญหาความสูง */
 .card{
   background:#14141c;
   border-radius:20px;
-  padding:18px;
+  padding:20px;
   text-align:center;
   transition: all 0.3s ease;
   border: 1px solid #2a2a38;
   display: flex;
-  flex-direction: column;
-  height: 100%; /* ให้ Card สูงเท่ากันในแถวเดียว */
-  position: relative;
+  flex-direction: column; /* จัดองค์ประกอบในแนวตั้ง */
+  height: 100%; /* ให้ Card ทุกใบสูงเท่ากันในแถวเดียวกัน */
 }
 .card:hover{
-  transform: translateY(-10px);
-  box-shadow: 0 15px 30px rgba(0,0,0,0.6);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
   border-color: #4f7cff;
 }
 
 .card img{
   width:100%;
-  height:160px;
+  height:180px;
   object-fit:cover;
-  border-radius:14px;
+  border-radius:12px;
   margin-bottom:15px;
   background:#000;
+  flex-shrink: 0; /* ป้องกันรูปโดนบีบ */
 }
 
-/* Buttons */
-button{
+.card h3 {
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+  word-break: break-word; /* ป้องกันชื่อยาวเกินจนล้นการ์ด */
+}
+
+/* ดันปุ่มไปไว้ล่างสุดของการ์ดเสมอ */
+.card-btn {
+  margin-top: auto; 
   width:100%;
-  padding:14px;
+  padding:12px;
   border:none;
-  border-radius:12px;
+  border-radius:10px;
   background:#4f7cff;
   color:#fff;
   cursor:pointer;
   font-weight: 600;
   transition: 0.2s;
 }
-button:hover{background:#0353e9; transform: scale(1.02);}
+.card-btn:hover{background:#0353e9;}
 
-.back{
-  margin-bottom:25px;
-  background:#333;
-  width: auto;
-  padding: 10px 30px;
-  align-self: center;
+/* อื่นๆ */
+button.back{
+  margin-bottom:20px;
+  background:#2a2a38;
+  color: white;
+  border: none;
+  padding: 10px 25px;
+  border-radius: 8px;
+  cursor: pointer;
 }
 
-.delete-btn{background:#e63946; margin-top:10px; padding: 10px;}
-.delete-btn:hover{background:#a4161a;}
-
+.delete-btn{background:#e63946; margin-top:15px; padding: 12px; border:none; color:white; border-radius:10px; cursor:pointer; width:100%;}
 .add-btn{
-  position:fixed;
-  bottom:30px;
-  right:30px;
-  width:65px;
-  height:65px;
-  border-radius:50%;
-  background:#ff4f8b;
-  color:#fff;
-  border:none;
-  cursor:pointer;
-  z-index:100;
-  font-size:35px;
-  box-shadow: 0 5px 15px rgba(255, 79, 139, 0.4);
+  position:fixed; bottom:30px; right:30px; width:60px; height:60px;
+  border-radius:50%; background:#ff4f8b; color:#fff; border:none;
+  cursor:pointer; z-index:100; font-size:30px; box-shadow: 0 5px 15px rgba(255, 79, 139, 0.4);
 }
 
-/* Form Styles */
-input,select,textarea{
-  width:100%;
-  padding:12px;
-  margin-bottom:15px;
-  border-radius:10px;
-  border:1px solid #333;
-  background: #1b1b26;
-  color: #fff;
-  font-size: 16px;
-}
-
+input,select,textarea{ width:100%; padding:12px; margin-bottom:15px; border-radius:10px; border:1px solid #333; background: #1b1b26; color: #fff; }
 .hidden{display:none !important;}
 
 .filter-box{
-  margin: 10px 0 30px 0;
-  padding:20px;
-  background:#14141c;
-  border-radius:15px;
-  display:none; /* จะถูกสั่งเปิดด้วย JS */
-  gap:20px;
-  justify-content:center;
-  border: 1px solid #2a2a38;
-  width: 100%;
+  margin-bottom: 20px; padding:20px; background:#14141c; border-radius:15px;
+  display:none; gap:15px; flex-wrap: wrap; justify-content:center; border: 1px solid #2a2a38;
 }
-.filter-box label{ font-size: 14px; color: #888; text-align: left; }
-.filter-box select{ width: 160px; margin-bottom: 0; margin-top: 5px; border-color: #4f7cff; }
+.filter-box label{ font-size: 14px; color: #888; }
+.filter-box select{ width: auto; min-width: 140px; margin: 5px 0 0 0; border-color: #4f7cff; }
 
-/* Page Control */
-.page { width: 100%; display: flex; flex-direction: column; }
+.page { width: 100%; animation: fadeIn 0.3s ease-in; }
+@keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
 </style>
 </head>
 <body>
@@ -145,11 +120,13 @@ input,select,textarea{
     <div class="grid">
       <div class="card">
         <img src="Minecraft_F.png" alt="Minecraft">
-        <button onclick="chooseGame('Minecraft')">Minecraft</button>
+        <h3 style="margin-top:10px;">Minecraft</h3>
+        <button class="card-btn" onclick="chooseGame('Minecraft')">เลือก</button>
       </div>
       <div class="card">
         <img src="Roblox_F.png" alt="Roblox">
-        <button onclick="chooseGame('Roblox')">Roblox</button>
+        <h3 style="margin-top:10px;">Roblox</h3>
+        <button class="card-btn" onclick="chooseGame('Roblox')">เลือก</button>
       </div>
     </div>
   </div>
@@ -187,12 +164,12 @@ input,select,textarea{
 
   <div id="page4" class="page hidden">
     <button class="back" onclick="goPage(3)">← ย้อนกลับ</button>
-    <h2 id="detailName" style="text-align:center; margin-bottom:20px;"></h2>
-    <div style="max-width:600px; width:100%; margin:auto;">
-      <div class="card" style="width:100%; cursor:default;">
-        <img id="detailImgTag" src="" style="height:300px;">
+    <div style="max-width:700px; width:100%; margin:auto;">
+      <h2 id="detailName" style="text-align:center; margin-bottom:20px;"></h2>
+      <div class="card" style="cursor:default;">
+        <img id="detailImgTag" src="" style="height:auto; max-height:400px;">
         <div id="detailExtra" style="text-align:left; margin: 15px 0; background:#0b0b0f; padding:20px; border-radius:15px; border:1px solid #333;"></div>
-        <p id="detailDesc" style="color:#aaa; line-height:1.6; margin-bottom:20px; text-align:left;"></p>
+        <p id="detailDesc" style="color:#aaa; line-height:1.6; margin-bottom:20px; text-align:left; white-space: pre-line;"></p>
         <button class="delete-btn" id="deleteBtn">ลบเซิฟเวอร์นี้ออกจากระบบ</button>
       </div>
     </div>
@@ -201,7 +178,7 @@ input,select,textarea{
   <div id="addPage" class="page hidden">
     <button class="back" onclick="goPage(1)">← ย้อนกลับ</button>
     <h2 style="text-align:center; margin-bottom:25px;">ลงประกาศเซิร์ฟเวอร์</h2>
-    <div style="max-width: 500px; width:100%; margin:auto; background:#14141c; padding:25px; border-radius:20px;">
+    <div style="max-width: 500px; width:100%; margin:auto; background:#14141c; padding:25px; border-radius:20px; border: 1px solid #2a2a38;">
       <select id="addGame" onchange="updateAddModes();toggleAdd()">
         <option value="">-- เลือกเกม --</option>
         <option>Minecraft</option>
@@ -211,7 +188,7 @@ input,select,textarea{
       <textarea id="addDesc" rows="4" placeholder="รายละเอียด/ช่องทางติดต่อ"></textarea>
 
       <div style="background:#1b1b26; padding:15px; border-radius:12px; margin-bottom:15px;">
-        <b style="display:block; margin-bottom:10px;">เลือกแนวเกม</b>
+        <b style="display:block; margin-bottom:10px;">เลือกแนวเกม (เลือกได้อย่างน้อย 1)</b>
         <div id="addModeList"></div>
       </div>
 
@@ -231,7 +208,7 @@ input,select,textarea{
       <input type="file" accept="image/*" id="addImg" style="margin-top:10px;">
       <div id="imgPreview" style="margin-top:10px; text-align:center;"></div>
       
-      <button onclick="saveServer()" style="margin-top:20px; background:#27ae60;">บันทึกข้อมูล</button>
+      <button onclick="saveServer()" style="margin-top:20px; background:#27ae60; color:white; border:none; padding:15px; width:100%; border-radius:10px; font-weight:bold; cursor:pointer;">บันทึกข้อมูลและลงประกาศ</button>
     </div>
   </div>
 
@@ -275,7 +252,7 @@ const modesByGame={
   Roblox:["Adventure","RPG","Simulator","Obby","PVP","Tower Defense"]
 };
 
-/* Logic */
+/* Navigation Logic */
 window.show=(p)=>{
     document.querySelectorAll('.page').forEach(d=>d.classList.add('hidden'));
     document.getElementById(p).classList.remove('hidden');
@@ -291,7 +268,7 @@ window.chooseGame=g=>{
   modesByGame[g].forEach(m=>{
     const d = document.createElement('div');
     d.className = 'card';
-    d.innerHTML = `<button onclick="chooseMode('${m}')">${m}</button>`;
+    d.innerHTML = `<h3>${m}</h3><button class="card-btn" onclick="chooseMode('${m}')">เลือกแนวนนี้</button>`;
     modeList.appendChild(d);
   });
   show("page2");
@@ -300,17 +277,12 @@ window.chooseGame=g=>{
 window.chooseMode=m=>{
   currentMode=m;
   serverTitle.innerText=currentGame + " » " + m;
-  
-  if(currentGame === "Minecraft") {
-    filterContainer.style.display = "flex";
-  } else {
-    filterContainer.style.display = "none";
-  }
-
+  filterContainer.style.display = (currentGame === "Minecraft") ? "flex" : "none";
   renderServers();
   show("page3");
 };
 
+/* Render List Logic */
 window.renderServers = () => {
   serverList.innerHTML="";
   let filtered = servers.filter(s=>s.game===currentGame && Array.isArray(s.modes) && s.modes.includes(currentMode));
@@ -321,7 +293,7 @@ window.renderServers = () => {
   }
 
   if(filtered.length === 0) {
-    serverList.innerHTML = "<div style='grid-column: 1/-1; text-align:center; padding:50px; color:#555;'>ยังไม่มีการประกาศเซิร์ฟเวอร์ในหมวดนี้</div>";
+    serverList.innerHTML = "<div style='grid-column: 1/-1; text-align:center; padding:100px 0; color:#555;'>ยังไม่มีการประกาศในขณะนี้</div>";
     return;
   }
 
@@ -330,8 +302,8 @@ window.renderServers = () => {
     card.className="card";
     card.innerHTML=`
         <img src="${s.img}">
-        <h3 style="margin-bottom:15px; font-size:18px;">${s.name}</h3>
-        <button onclick="openDetail('${s.id}')">ดูรายละเอียด</button>
+        <h3>${s.name}</h3>
+        <button class="card-btn" onclick="openDetail('${s.id}')">ดูรายละเอียด</button>
     `;
     serverList.appendChild(card);
   });
@@ -349,13 +321,13 @@ window.openDetail=id=>{
     detailExtra.innerHTML = `
       <p><b>Version:</b> ${s.realVersion||"-"}</p>
       <p><b>ระบบ:</b> ${s.version==="original"?"แท้เท่านั้น":"แท้/เถื่อน"}</p>
-      <p><b>Edition:</b> ${s.edition.toUpperCase()}</p>
+      <p><b>Edition:</b> ${s.edition ? s.edition.toUpperCase() : "-"}</p>
       <hr style="margin:15px 0; border:0; border-top:1px solid #333;">
       <p><b>IP (PC):</b> <span style="color:#4f7cff">${s.pc||"-"}</span></p>
       <p><b>IP (Phone):</b> <span style="color:#4f7cff">${s.phone||"-"}</span></p>
     `;
   } else {
-    detailExtra.innerHTML = `<a href="${s.link}" target="_blank"><button style="background:#00c2ff;">เข้าเล่นผ่าน Roblox</button></a>`;
+    detailExtra.innerHTML = `<a href="${s.link}" target="_blank" style="text-decoration:none;"><button class="card-btn" style="background:#00c2ff;">เข้าเล่นผ่าน Roblox</button></a>`;
   }
   show("page4");
 };
@@ -363,12 +335,13 @@ window.openDetail=id=>{
 deleteBtn.onclick = () => {
   if(confirm("ยืนยันการลบข้อมูลนี้ออกจากระบบ?")){
     remove(ref(db,"servers/"+currentServerId)).then(()=>{
-      alert("ลบสำเร็จแล้ว");
+      alert("ลบข้อมูลเรียบร้อย");
       show("page1");
     });
   }
 };
 
+/* Form & Data Logic */
 window.toggleAdd=()=>{
   mcExtra.classList.toggle("hidden", addGame.value!=="Minecraft");
   rbxFields.classList.toggle("hidden", addGame.value!=="Roblox");
@@ -380,6 +353,8 @@ window.updateAddModes=()=>{
   modesByGame[addGame.value].forEach(m=>{
     const l = document.createElement('label');
     l.style.display = "block";
+    l.style.margin = "8px 0";
+    l.style.cursor = "pointer";
     l.innerHTML = `<input type="checkbox" value="${m}" style="width:auto; margin-right:10px;"> ${m}`;
     addModeList.appendChild(l);
   });
@@ -391,14 +366,14 @@ addImg.onchange=()=>{
   const r=new FileReader();
   r.onload=e=>{
     base64Img = e.target.result;
-    imgPreview.innerHTML=`<img src="${base64Img}" style="width:100%; border-radius:10px; margin-top:10px;">`;
+    imgPreview.innerHTML=`<img src="${base64Img}" style="width:100%; border-radius:10px; margin-top:10px; border: 1px solid #333;">`;
   };
   r.readAsDataURL(f);
 };
 
 window.saveServer=()=>{
   const modes=[...addModeList.querySelectorAll("input:checked")].map(c=>c.value);
-  if(!addGame.value||!addName.value||modes.length===0||!base64Img) return alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+  if(!addGame.value||!addName.value||modes.length===0||!base64Img) return alert("กรุณากรอกข้อมูลและอัปโหลดรูปภาพให้ครบถ้วน");
 
   const serverData = {
     game:addGame.value, name:addName.value, desc:addDesc.value, modes:modes, img:base64Img,
@@ -409,11 +384,12 @@ window.saveServer=()=>{
   };
 
   push(ref(db,"servers"), serverData).then(()=>{
-    alert("ลงประกาศสำเร็จ!");
+    alert("ลงประกาศสำเร็จแล้ว!");
     location.reload();
   });
 };
 
+/* Firebase Sync */
 onValue(ref(db,"servers"), snap=>{
   servers=[];
   snap.forEach(c=>servers.push({id:c.key,...c.val()}));
