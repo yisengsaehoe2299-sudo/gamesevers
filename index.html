@@ -19,23 +19,25 @@ header{padding:30px 20px;text-align:center;font-size:32px;font-weight:bold;backg
   flex-grow: 1;
 }
 
-/* --- ส่วนที่แก้ไขให้เรียง 1-2-3 (ซ้าย-กลาง-ขวา) แน่นอน --- */
+/* แก้ไข Grid: บังคับแถวละ 3 คอลัมน์ และจัดเรียงให้สวย */
 .grid{
   display: grid;
-  /* บังคับแบ่ง 3 ช่องเท่ากันเป๊ะๆ */
-  grid-template-columns: 1fr 1fr 1fr; 
+  grid-template-columns: repeat(3, 1fr);
   gap: 25px;
   width: 100%;
   padding: 20px 0;
-  align-items: start; /* สำคัญ: ป้องกัน Card ยืดทับกันในแนวตั้ง */
+  align-items: stretch;
 }
 
-/* สำหรับมือถือ ถ้าจอแคบเกินไปให้เหลือ 1 คอลัมน์เพื่อความสวยงาม */
-@media (max-width: 800px) {
+/* ปรับให้รองรับมือถือ */
+@media (max-width: 900px) {
+  .grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 600px) {
   .grid { grid-template-columns: 1fr; }
 }
 
-/* Card Design */
+/* Card ดีไซน์ - ปรับให้สูงเท่ากัน */
 .card{
   background:#14141c;
   border-radius:20px;
@@ -45,8 +47,11 @@ header{padding:30px 20px;text-align:center;font-size:32px;font-weight:bold;backg
   border: 1px solid #2a2a38;
   display: flex;
   flex-direction: column;
-  min-height: 350px; /* กำหนดความสูงขั้นต่ำไว้กันเบี้ยว */
+  height: 100%;
+  min-height: 350px;
+  overflow: hidden;
 }
+
 .card:hover{
   transform: translateY(-8px);
   box-shadow: 0 12px 24px rgba(0,0,0,0.5);
@@ -60,9 +65,17 @@ header{padding:30px 20px;text-align:center;font-size:32px;font-weight:bold;backg
   border-radius:14px;
   margin-bottom:15px;
   background:#000;
+  flex-shrink: 0;
 }
 
-.card h3 { margin-bottom: 15px; font-size: 1.1rem; }
+.card h3 {
+  margin-bottom: 15px;
+  font-size: 1.1rem;
+  min-height: 2.5em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
 .card-btn {
   margin-top: auto;
@@ -74,7 +87,10 @@ header{padding:30px 20px;text-align:center;font-size:32px;font-weight:bold;backg
   color:#fff;
   cursor:pointer;
   font-weight: 600;
+  transition: 0.2s;
+  flex-shrink: 0;
 }
+.card-btn:hover{background:#0353e9;}
 
 .back{
   margin-bottom:25px;
@@ -86,10 +102,11 @@ header{padding:30px 20px;text-align:center;font-size:32px;font-weight:bold;backg
   cursor: pointer;
 }
 
+.delete-btn{background:#e63946; margin-top:15px; padding: 12px; border:none; color:#fff; border-radius:10px; cursor:pointer;}
 .add-btn{
   position:fixed; bottom:30px; right:30px; width:65px; height:65px;
   border-radius:50%; background:#ff4f8b; color:#fff; border:none;
-  cursor:pointer; z-index:100; font-size:35px;
+  cursor:pointer; z-index:100; font-size:35px; box-shadow: 0 5px 15px rgba(255, 79, 139, 0.4);
 }
 
 input,select,textarea{ width:100%; padding:12px; margin-bottom:15px; border-radius:10px; border:1px solid #333; background: #1b1b26; color: #fff; }
@@ -99,8 +116,10 @@ input,select,textarea{ width:100%; padding:12px; margin-bottom:15px; border-radi
   margin-bottom: 25px; padding:20px; background:#14141c; border-radius:15px;
   display:none; gap:20px; justify-content:center; border: 1px solid #2a2a38;
 }
+.filter-box select{ width: 150px; border-color: #4f7cff; margin-top:5px; }
 
-.page { width: 100%; }
+.page { width: 100%; animation: fadeIn 0.4s; }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
 </style>
 </head>
 <body>
@@ -136,8 +155,21 @@ input,select,textarea{ width:100%; padding:12px; margin-bottom:15px; border-radi
     <h2 id="serverTitle" style="text-align:center; margin-bottom:10px;"></h2>
     
     <div id="filterContainer" class="filter-box">
-      <label>เวอร์ชัน: <select id="filterVersion" onchange="renderServers()"><option value="">ทั้งหมด</option><option value="original">แท้</option><option value="both">แท้/เถื่อน</option></select></label>
-      <label>Edition: <select id="filterEdition" onchange="renderServers()"><option value="">ทั้งหมด</option><option value="java">Java</option><option value="bedrock">Bedrock</option><option value="both">ทั้งสอง</option></select></label>
+      <label>เวอร์ชัน:<br>
+        <select id="filterVersion" onchange="renderServers()">
+          <option value="">ทั้งหมด</option>
+          <option value="original">แท้</option>
+          <option value="both">แท้/เถื่อน</option>
+        </select>
+      </label>
+      <label>Edition:<br>
+        <select id="filterEdition" onchange="renderServers()">
+          <option value="">ทั้งหมด</option>
+          <option value="java">Java</option>
+          <option value="bedrock">Bedrock</option>
+          <option value="both">ทั้งสอง</option>
+        </select>
+      </label>
     </div>
 
     <div class="grid" id="serverList"></div>
@@ -148,10 +180,10 @@ input,select,textarea{ width:100%; padding:12px; margin-bottom:15px; border-radi
     <div style="max-width:650px; width:100%; margin:auto;">
       <h2 id="detailName" style="text-align:center; margin-bottom:20px;"></h2>
       <div class="card" style="cursor:default;">
-        <img id="detailImgTag" src="">
+        <img id="detailImgTag" src="" style="height:auto;">
         <div id="detailExtra" style="text-align:left; margin: 15px 0; background:#0b0b0f; padding:20px; border-radius:15px; border:1px solid #333;"></div>
         <p id="detailDesc" style="color:#aaa; line-height:1.6; margin-bottom:20px; text-align:left; white-space:pre-wrap;"></p>
-        <button style="background:#e63946; padding:12px; border:none; color:#fff; border-radius:10px; cursor:pointer;" id="deleteBtn">ลบเซิฟเวอร์นี้ออกจากระบบ</button>
+        <button class="delete-btn" id="deleteBtn">ลบเซิฟเวอร์นี้ออกจากระบบ</button>
       </div>
     </div>
   </div>
@@ -167,7 +199,12 @@ input,select,textarea{ width:100%; padding:12px; margin-bottom:15px; border-radi
       </select>
       <input id="addName" placeholder="ชื่อเซิร์ฟเวอร์">
       <textarea id="addDesc" rows="4" placeholder="รายละเอียด/ช่องทางติดต่อ"></textarea>
-      <div id="addModeList" style="background:#1b1b26; padding:15px; border-radius:12px; margin-bottom:15px;"></div>
+
+      <div style="background:#1b1b26; padding:15px; border-radius:12px; margin-bottom:15px;">
+        <b style="display:block; margin-bottom:10px;">เลือกแนวเกม</b>
+        <div id="addModeList"></div>
+      </div>
+
       <div id="mcExtra" class="hidden">
         <select id="mcVersion"><option value="original">แท้เท่านั้น</option><option value="both">แท้/เถื่อน</option></select>
         <select id="mcEdition"><option value="java">Java</option><option value="bedrock">Bedrock</option><option value="both">ทั้งสอง</option></select>
@@ -175,10 +212,16 @@ input,select,textarea{ width:100%; padding:12px; margin-bottom:15px; border-radi
         <input id="pcIP" placeholder="PC IP">
         <input id="phoneIP" placeholder="Phone IP (ถ้ามี)">
       </div>
-      <div id="rbxFields" class="hidden"><input id="rbxLink" placeholder="ลิงก์ Roblox"></div>
+
+      <div id="rbxFields" class="hidden">
+        <input id="rbxLink" placeholder="ลิงก์ Roblox (https://...)">
+      </div>
+
+      <b>รูปภาพหน้าปก</b>
       <input type="file" accept="image/*" id="addImg" style="margin-top:10px;">
-      <div id="imgPreview" style="margin-top:10px;"></div>
-      <button onclick="saveServer()" style="margin-top:20px; background:#27ae60; color:#fff; border:none; padding:15px; border-radius:10px; width:100%; cursor:pointer; font-weight:bold;">ลงประกาศ</button>
+      <div id="imgPreview" style="margin-top:10px; text-align:center;"></div>
+      
+      <button onclick="saveServer()" style="margin-top:20px; background:#27ae60; color:#fff; border:none; padding:15px; border-radius:10px; width:100%; cursor:pointer; font-weight:bold;">บันทึกข้อมูล</button>
     </div>
   </div>
 
@@ -199,6 +242,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+/* Elements */
 const gameTitle=document.getElementById("gameTitle"), serverTitle=document.getElementById("serverTitle"),
       modeList=document.getElementById("modeList"), serverList=document.getElementById("serverList"),
       detailName=document.getElementById("detailName"), detailDesc=document.getElementById("detailDesc"),
@@ -215,16 +259,28 @@ const gameTitle=document.getElementById("gameTitle"), serverTitle=document.getEl
 
 let servers=[];
 let currentGame="", currentMode="", currentServerId="", base64Img="";
-const modesByGame={ Minecraft:["Survival","RPG","PVP","Skyblock","Minigame"], Roblox:["Adventure","RPG","Simulator","Obby","PVP","Tower Defense"] };
 
-window.show=(p)=>{ document.querySelectorAll('.page').forEach(d=>d.classList.add('hidden')); document.getElementById(p).classList.remove('hidden'); window.scrollTo(0,0); };
+const modesByGame={
+  Minecraft:["Survival","RPG","PVP","Skyblock","Minigame"],
+  Roblox:["Adventure","RPG","Simulator","Obby","PVP","Tower Defense"]
+};
+
+/* Logic */
+window.show=(p)=>{
+    document.querySelectorAll('.page').forEach(d=>d.classList.add('hidden'));
+    document.getElementById(p).classList.remove('hidden');
+    window.scrollTo(0,0);
+};
 window.goPage=n=>show("page"+n);
 window.openAdd=()=>show("addPage");
 
 window.chooseGame=g=>{
-  currentGame=g; gameTitle.innerText="หมวดหมู่: " + g; modeList.innerHTML="";
+  currentGame=g;
+  gameTitle.innerText="หมวดหมู่: " + g;
+  modeList.innerHTML="";
   modesByGame[g].forEach(m=>{
-    const d = document.createElement('div'); d.className = 'card';
+    const d = document.createElement('div');
+    d.className = 'card';
     d.innerHTML = `<h3>${m}</h3><button class="card-btn" onclick="chooseMode('${m}')">เลือก</button>`;
     modeList.appendChild(d);
   });
@@ -232,67 +288,119 @@ window.chooseGame=g=>{
 };
 
 window.chooseMode=m=>{
-  currentMode=m; serverTitle.innerText=currentGame + " » " + m;
+  currentMode=m;
+  serverTitle.innerText=currentGame + " » " + m;
   filterContainer.style.display = (currentGame === "Minecraft") ? "flex" : "none";
-  renderServers(); show("page3");
+  renderServers();
+  show("page3");
 };
 
 window.renderServers = () => {
   serverList.innerHTML="";
   let filtered = servers.filter(s=>s.game===currentGame && Array.isArray(s.modes) && s.modes.includes(currentMode));
+  
   if(currentGame==="Minecraft"){
     if(filterVersion.value) filtered = filtered.filter(s=>s.version===filterVersion.value);
     if(filterEdition.value) filtered = filtered.filter(s=>s.edition===filterEdition.value);
   }
+
   if(filtered.length === 0) {
-    serverList.innerHTML = "<div style='grid-column: 1/-1; text-align:center; padding:50px;'>ยังไม่มีข้อมูล</div>";
+    serverList.innerHTML = "<div style='grid-column: 1/-1; text-align:center; padding:60px; color:#555;'>ไม่มีข้อมูลเซิร์ฟเวอร์ในขณะนี้</div>";
     return;
   }
+
   filtered.forEach(s=>{
-    const card=document.createElement("div"); card.className="card";
-    card.innerHTML=`<img src="${s.img}"><h3>${s.name}</h3><button class="card-btn" onclick="openDetail('${s.id}')">ดูรายละเอียด</button>`;
+    const card=document.createElement("div");
+    card.className="card";
+    card.innerHTML=`
+        <img src="${s.img}">
+        <h3>${s.name}</h3>
+        <button class="card-btn" onclick="openDetail('${s.id}')">ดูรายละเอียด</button>
+    `;
     serverList.appendChild(card);
   });
 };
 
 window.openDetail=id=>{
-  const s=servers.find(x=>x.id===id); if(!s) return;
-  currentServerId=id; detailName.innerText=s.name; detailDesc.innerText=s.desc; detailImgTag.src=s.img;
+  const s=servers.find(x=>x.id===id);
+  if(!s) return;
+  currentServerId=id;
+  detailName.innerText=s.name;
+  detailDesc.innerText=s.desc;
+  detailImgTag.src=s.img;
+  
   if(s.game==="Minecraft") {
-    detailExtra.innerHTML = `<p><b>Version:</b> ${s.realVersion||"-"}</p><p><b>ระบบ:</b> ${s.version==="original"?"แท้เท่านั้น":"แท้/เถื่อน"}</p><p><b>Edition:</b> ${s.edition.toUpperCase()}</p><hr style="margin:10px 0; border:0; border-top:1px solid #333;"><p>IP (PC): ${s.pc||"-"}</p><p>IP (Phone): ${s.phone||"-"}</p>`;
+    detailExtra.innerHTML = `
+      <p><b>Version:</b> ${s.realVersion||"-"}</p>
+      <p><b>ระบบ:</b> ${s.version==="original"?"แท้เท่านั้น":"แท้/เถื่อน"}</p>
+      <p><b>Edition:</b> ${s.edition.toUpperCase()}</p>
+      <hr style="margin:15px 0; border:0; border-top:1px solid #333;">
+      <p><b>IP (PC):</b> <span style="color:#4f7cff">${s.pc||"-"}</span></p>
+      <p><b>IP (Phone):</b> <span style="color:#4f7cff">${s.phone||"-"}</span></p>
+    `;
   } else {
-    detailExtra.innerHTML = `<a href="${s.link}" target="_blank"><button class="card-btn" style="background:#00c2ff;">เล่น Roblox</button></a>`;
+    detailExtra.innerHTML = `<a href="${s.link}" target="_blank"><button class="card-btn" style="background:#00c2ff;">เข้าเล่นผ่าน Roblox</button></a>`;
   }
   show("page4");
 };
 
-deleteBtn.onclick = () => { if(confirm("ลบหรือไม่?")){ remove(ref(db,"servers/"+currentServerId)).then(()=>{ alert("ลบแล้ว"); show("page1"); }); } };
-window.toggleAdd=()=>{ mcExtra.classList.toggle("hidden", addGame.value!=="Minecraft"); rbxFields.classList.toggle("hidden", addGame.value!=="Roblox"); };
+deleteBtn.onclick = () => {
+  if(confirm("ยืนยันการลบ?")){
+    remove(ref(db,"servers/"+currentServerId)).then(()=>{
+      alert("ลบสำเร็จ");
+      show("page1");
+    });
+  }
+};
+
+window.toggleAdd=()=>{
+  mcExtra.classList.toggle("hidden", addGame.value!=="Minecraft");
+  rbxFields.classList.toggle("hidden", addGame.value!=="Roblox");
+};
+
 window.updateAddModes=()=>{
-  addModeList.innerHTML="<b>เลือกแนวเกม:</b><br>";
+  addModeList.innerHTML="";
   if(!addGame.value) return;
   modesByGame[addGame.value].forEach(m=>{
-    const l = document.createElement('label'); l.style.display="block";
-    l.innerHTML = `<input type="checkbox" value="${m}" style="width:auto; margin-right:8px;"> ${m}`;
+    const l = document.createElement('label');
+    l.style.display = "block";
+    l.innerHTML = `<input type="checkbox" value="${m}" style="width:auto; margin-right:10px;"> ${m}`;
     addModeList.appendChild(l);
   });
 };
 
 addImg.onchange=()=>{
-  const f=addImg.files[0]; if(!f) return;
-  const r=new FileReader(); r.onload=e=>{ base64Img = e.target.result; imgPreview.innerHTML=`<img src="${base64Img}" style="width:100%; border-radius:10px;">`; };
+  const f=addImg.files[0];
+  if(!f) return;
+  const r=new FileReader();
+  r.onload=e=>{
+    base64Img = e.target.result;
+    imgPreview.innerHTML=`<img src="${base64Img}" style="width:100%; border-radius:10px; margin-top:10px;">`;
+  };
   r.readAsDataURL(f);
 };
 
 window.saveServer=()=>{
   const modes=[...addModeList.querySelectorAll("input:checked")].map(c=>c.value);
-  if(!addGame.value||!addName.value||modes.length===0||!base64Img) return alert("กรอกข้อมูลให้ครบ");
-  const serverData = { game:addGame.value, name:addName.value, desc:addDesc.value, modes:modes, img:base64Img, pc:pcIP.value||null, phone:phoneIP.value||null, link:rbxLink.value||null, version:addGame.value==="Minecraft"?mcVersion.value:null, edition:addGame.value==="Minecraft"?mcEdition.value:null, realVersion:addGame.value==="Minecraft"?mcRealVersion.value:null };
-  push(ref(db,"servers"), serverData).then(()=>{ alert("สำเร็จ!"); location.reload(); });
+  if(!addGame.value||!addName.value||modes.length===0||!base64Img) return alert("กรุณากรอกข้อมูลให้ครบ");
+
+  const serverData = {
+    game:addGame.value, name:addName.value, desc:addDesc.value, modes:modes, img:base64Img,
+    pc:pcIP.value||null, phone:phoneIP.value||null, link:rbxLink.value||null,
+    version:addGame.value==="Minecraft"?mcVersion.value:null,
+    edition:addGame.value==="Minecraft"?mcEdition.value:null,
+    realVersion:addGame.value==="Minecraft"?mcRealVersion.value:null
+  };
+
+  push(ref(db,"servers"), serverData).then(()=>{
+    alert("ลงประกาศสำเร็จ!");
+    location.reload();
+  });
 };
 
 onValue(ref(db,"servers"), snap=>{
-  servers=[]; snap.forEach(c=>servers.push({id:c.key,...c.val()}));
+  servers=[];
+  snap.forEach(c=>servers.push({id:c.key,...c.val()}));
   if(!document.getElementById("page3").classList.contains("hidden")) renderServers();
 });
 </script>
