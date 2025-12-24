@@ -99,7 +99,7 @@ input,select,textarea{width:100%;padding:10px;margin-bottom:10px;border-radius:8
     <div id="addModeList"></div>
   </div>
 
-  <!-- สำหรับ Minecraft เพิ่ม -->
+  <!-- สำหรับ Minecraft -->
   <div id="mcExtra" class="hidden">
     <b>เวอร์ชันเกม</b>
     <select id="mcVersion">
@@ -141,7 +141,7 @@ input,select,textarea{width:100%;padding:10px;margin-bottom:10px;border-radius:8
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-/* ===== FIREBASE ===== */
+/* Firebase */
 const firebaseConfig = {
   apiKey: "AIzaSyBcs3Owrnp3doAgLpT84ieIZZ-RL8XA8zs",
   authDomain: "gamesevers-5421f.firebaseapp.com",
@@ -151,7 +151,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-/* ===== BACKGROUND ===== */
+/* Background */
 const bg = document.getElementById("bg");
 function genBG(){
   bg.innerHTML="";
@@ -179,7 +179,7 @@ function genBG(){
 document.addEventListener("click",e=>{if(e.target.tagName==="BUTTON") genBG();});
 genBG();
 
-/* ===== DATA ===== */
+/* Data */
 const modesByGame={
   Minecraft:["Survival","RPG","PVP","Skyblock","Minigame"],
   Roblox:["Adventure","RPG","Simulator","Obby","PVP","Tower Defense"]
@@ -187,14 +187,9 @@ const modesByGame={
 let servers=[];
 let currentGame="";
 let currentServerId="";
+let currentMode="";
 
-/* ===== LOAD SERVERS ===== */
-onValue(ref(db,"servers"), snap=>{
-  servers=[];
-  snap.forEach(c=>servers.push({ id:c.key, ...c.val() }));
-});
-
-/* ===== ELEMENTS ===== */
+/* Elements */
 const gameTitle=document.getElementById("gameTitle");
 const modeList=document.getElementById("modeList");
 const serverList=document.getElementById("serverList");
@@ -224,7 +219,7 @@ const mcRealVersion=document.getElementById("mcRealVersion");
 // Delete
 const deleteBtn = document.getElementById("deleteBtn");
 
-/* ===== NAVIGATION ===== */
+/* Navigation */
 function show(p){
   document.querySelectorAll('.page').forEach(d=>{
     if(d.id===p) d.classList.remove('hidden');
@@ -235,7 +230,7 @@ function show(p){
 window.goPage=n=>show("page"+n);
 window.openAdd=()=>show("addPage");
 
-/* ===== UI ===== */
+/* UI */
 window.chooseGame=g=>{
   currentGame=g;
   gameTitle.innerText=g+" : เลือกแนวเกม";
@@ -247,19 +242,30 @@ window.chooseGame=g=>{
 };
 
 window.chooseMode=m=>{
-  serverList.innerHTML="";
-  servers.filter(s=>s.game===currentGame && s.modes.includes(m))
-    .forEach(s=>{
-      serverList.innerHTML+=`
-      <div class="card">
-        <img src="${s.img}">
-        <button onclick="openDetail('${s.id}')">${s.name}</button>
-        <button class="delete-btn" onclick="deleteServer('${s.id}')">ลบ</button>
-      </div>`;
-    });
+  currentMode=m;
+  renderServers();
   show("page3");
 };
 
+// Render servers dynamically
+function renderServers(){
+  serverList.innerHTML="";
+  servers.filter(s=>s.game===currentGame && s.modes.includes(currentMode))
+    .forEach(s=>{
+      const card = document.createElement("div");
+      card.className="card";
+      card.innerHTML=`
+        <img src="${s.img}">
+        <button onclick="openDetail('${s.id}')">${s.name}</button>
+        <button class="delete-btn">ลบ</button>
+      `;
+      // Delete button
+      card.querySelector(".delete-btn").onclick=()=>deleteServer(s.id);
+      serverList.appendChild(card);
+    });
+}
+
+/* Detail */
 window.openDetail=id=>{
   const s=servers.find(x=>x.id===id);
   if(!s) return;
@@ -273,16 +279,17 @@ window.openDetail=id=>{
   show("page4");
 };
 
-// ลบจากหน้า Detail
+// Delete in detail page
 deleteBtn.onclick = ()=>{
   if(currentServerId && confirm("คุณต้องการลบเซิฟนี้ใช่หรือไม่?")){
     remove(ref(db, "servers/"+currentServerId));
     alert("ลบเรียบร้อย");
+    renderServers();
     show("page1");
   }
 };
 
-/* ===== ADD SERVER ===== */
+/* ADD SERVER */
 window.toggleAdd=()=>{
   const isMC = addGame.value==="Minecraft";
   mcFields.classList.toggle("hidden",!isMC);
@@ -332,14 +339,22 @@ window.saveServer=()=>{
   show("page1");
 };
 
-// ลบจากหน้า Mode List
-window.deleteServer=id=>{
+// Delete function
+function deleteServer(id){
   if(confirm("คุณต้องการลบเซิฟนี้ใช่หรือไม่?")){
     remove(ref(db,"servers/"+id));
     alert("ลบเรียบร้อย");
-    chooseMode(""); 
+    renderServers();
   }
-};
+}
+
+// Firebase real-time listener
+onValue(ref(db,"servers"), snap=>{
+  servers=[];
+  snap.forEach(c=>servers.push({ id:c.key, ...c.val() }));
+  if(currentGame && currentMode) renderServers();
+});
+
 </script>
 </body>
 </html>
