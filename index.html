@@ -4,18 +4,15 @@
 <meta charset="UTF-8">
 <title>Game Server Finder</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <style>
-*{box-sizing:border-box}
+*{box-sizing:border-box;margin:0;padding:0;font-family:Arial,sans-serif}
 body{
-  margin:0;
-  font-family:Arial,sans-serif;
   background:#0b0b0f;
   color:#fff;
   overflow-x:hidden;
 }
 
-/* ====== BACKGROUND DECOR ====== */
+/* ===== BACKGROUND ===== */
 #bg{
   position:fixed;
   inset:0;
@@ -26,19 +23,11 @@ body{
   position:absolute;
   opacity:.18;
 }
-.circle{
-  border-radius:50%;
-}
-.square{
-  border-radius:14px;
-}
-.triangle{
-  width:0;
-  height:0;
-  border-style:solid;
-}
+.circle{border-radius:50%}
+.square{border-radius:14px}
+.triangle{width:0;height:0;border-style:solid}
 
-/* ====== UI ====== */
+/* ===== HEADER ===== */
 header{
   padding:20px;
   text-align:center;
@@ -47,32 +36,51 @@ header{
   position:relative;
   z-index:2;
 }
+
+/* ===== CONTAINER ===== */
 .container{
   max-width:1100px;
   margin:auto;
   padding:20px;
   position:relative;
   z-index:2;
+  min-height:80vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
 }
+
+/* ===== GRID (Masonry-ish) ===== */
 .grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
 }
 .card{
   background:#14141c;
   border-radius:16px;
   padding:16px;
   text-align:center;
+  width:200px;
+  transition: transform .2s, box-shadow .2s;
+  margin-bottom:20px;
+}
+.card:hover{
+  transform: scale(1.05);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.5);
 }
 .card img{
   width:100%;
-  height:180px;
+  height:auto;
+  max-height:180px;
   object-fit:cover;
   border-radius:12px;
   margin-bottom:12px;
   background:#2a2a38;
 }
+
 button{
   width:100%;
   padding:12px;
@@ -81,9 +89,12 @@ button{
   background:#4f7cff;
   color:#fff;
   cursor:pointer;
+  transition: background .2s;
 }
+button:hover{background:#0353e9}
 .back{margin-bottom:15px;background:#444}
 
+/* ===== ADD BUTTON ===== */
 .add-btn{
   position:fixed;
   top:20px;
@@ -103,6 +114,7 @@ button{
   line-height:1;
 }
 
+/* ===== FORM ===== */
 input,select,textarea{
   width:100%;
   padding:10px;
@@ -112,6 +124,7 @@ input,select,textarea{
 }
 .hidden{display:none}
 
+/* ===== MODE BOX ===== */
 .mode-box{
   background:#1b1b26;
   padding:10px;
@@ -125,6 +138,7 @@ input,select,textarea{
   margin:6px 0;
 }
 
+/* ===== IMAGE PREVIEW ===== */
 .preview{
   width:100%;
   height:180px;
@@ -141,19 +155,30 @@ input,select,textarea{
   height:100%;
   object-fit:cover;
 }
+
+/* ===== PAGE ANIMATION ===== */
+.page{
+  opacity:1;
+  transition: opacity .4s;
+}
+.page.hidden{
+  opacity:0;
+  pointer-events:none;
+  position:absolute;
+  top:0; left:0; right:0;
+}
 </style>
 </head>
-
 <body>
 
 <div id="bg"></div>
-
 <button class="add-btn" onclick="openAdd()">＋</button>
 <header>หาเซิร์ฟเกม</header>
 
 <div class="container">
 
-<div id="page1">
+<!-- หน้าแรก -->
+<div id="page1" class="page">
   <h2>เลือกเกม</h2>
   <div class="grid">
     <div class="card">
@@ -167,73 +192,69 @@ input,select,textarea{
   </div>
 </div>
 
-<div id="page2" class="hidden">
+<!-- เลือกแนวเกม -->
+<div id="page2" class="page hidden">
   <button class="back" onclick="goPage(1)">← ย้อนกลับ</button>
   <h2 id="gameTitle"></h2>
   <div class="grid" id="modeList"></div>
 </div>
 
-<div id="page3" class="hidden">
+<!-- เลือกเซิฟ -->
+<div id="page3" class="page hidden">
   <button class="back" onclick="goPage(2)">← ย้อนกลับ</button>
   <h2>เลือกเซิร์ฟเวอร์</h2>
   <div class="grid" id="serverList"></div>
 </div>
 
-<div id="page4" class="hidden">
+<!-- รายละเอียดเซิฟ -->
+<div id="page4" class="page hidden">
   <button class="back" onclick="goPage(3)">← ย้อนกลับ</button>
   <h2 id="detailName"></h2>
   <p id="detailDesc"></p>
   <div id="detailExtra"></div>
 </div>
 
-<div id="addPage" class="hidden">
+<!-- เพิ่มเซิฟ -->
+<div id="addPage" class="page hidden">
   <button class="back" onclick="goPage(1)">← ย้อนกลับ</button>
   <h2>เพิ่มเซิร์ฟเวอร์</h2>
-
   <select id="addGame" onchange="updateAddModes();toggleAdd()">
     <option value="">-- เลือกเกม --</option>
     <option>Minecraft</option>
     <option>Roblox</option>
   </select>
-
   <input id="addName" placeholder="ชื่อเซิร์ฟ">
   <textarea id="addDesc" placeholder="คำอธิบาย"></textarea>
-
   <div class="mode-box">
     <b>แนวเกม</b>
     <div id="addModeList"></div>
   </div>
-
   <b>รูปปกเซิร์ฟ</b>
   <div class="preview" id="imgPreview">ยังไม่ได้เลือกรูป</div>
   <input type="file" accept="image/*" id="addImg">
-
   <div id="mcFields" class="hidden">
     <input id="pcIP" placeholder="PC IP">
     <input id="phoneIP" placeholder="Phone IP">
   </div>
-
   <div id="rbxFields" class="hidden">
     <input id="rbxLink" placeholder="ลิงก์ Roblox">
   </div>
-
   <button onclick="saveServer()">บันทึก</button>
 </div>
 
 </div>
 
 <script type="module">
-/* ===== FIREBASE ===== */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
+/* ===== FIREBASE ===== */
 const firebaseConfig = {
   apiKey: "AIzaSyBcs3Owrnp3doAgLpT84ieIZZ-RL8XA8zs",
   authDomain: "gamesevers-5421f.firebaseapp.com",
   databaseURL: "https://gamesevers-5421f-default-rtdb.firebaseio.com",
   projectId: "gamesevers-5421f"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
@@ -262,9 +283,7 @@ function genBG(){
     bg.appendChild(shape);
   }
 }
-document.addEventListener("click",e=>{
-  if(e.target.tagName==="BUTTON") genBG();
-});
+document.addEventListener("click",e=>{if(e.target.tagName==="BUTTON") genBG();});
 genBG();
 
 /* ===== DATA ===== */
@@ -272,28 +291,48 @@ const modesByGame={
   Minecraft:["Survival","RPG","PVP","Skyblock","Minigame"],
   Roblox:["Adventure","RPG","Simulator","Obby","PVP","Tower Defense"]
 };
-
 let servers=[];
 let currentGame="";
 
-/* ===== LOAD FROM FIREBASE ===== */
+/* ===== LOAD SERVERS ===== */
 onValue(ref(db,"servers"), snap=>{
   servers=[];
-  snap.forEach(c=>{
-    servers.push({ id:c.key, ...c.val() });
-  });
+  snap.forEach(c=>servers.push({ id:c.key, ...c.val() }));
 });
 
-/* ===== NAV ===== */
+/* ===== ELEMENTS ===== */
+const gameTitle=document.getElementById("gameTitle");
+const modeList=document.getElementById("modeList");
+const serverList=document.getElementById("serverList");
+const detailName=document.getElementById("detailName");
+const detailDesc=document.getElementById("detailDesc");
+const detailExtra=document.getElementById("detailExtra");
+
+const addGame=document.getElementById("addGame");
+const addName=document.getElementById("addName");
+const addDesc=document.getElementById("addDesc");
+const addModeList=document.getElementById("addModeList");
+const mcFields=document.getElementById("mcFields");
+const rbxFields=document.getElementById("rbxFields");
+const pcIP=document.getElementById("pcIP");
+const phoneIP=document.getElementById("phoneIP");
+const rbxLink=document.getElementById("rbxLink");
+const addImg=document.getElementById("addImg");
+const imgPreview=document.getElementById("imgPreview");
+
+/* ===== NAVIGATION ===== */
 function show(p){
-  document.querySelectorAll('.container>div').forEach(d=>d.classList.add('hidden'));
-  document.getElementById(p).classList.remove('hidden');
+  document.querySelectorAll('.page').forEach(d=>{
+    if(d.id===p) d.classList.remove('hidden');
+    else d.classList.add('hidden');
+  });
+  window.scrollTo(0,0);
 }
 window.goPage=n=>show("page"+n);
 window.openAdd=()=>show("addPage");
 
 /* ===== UI ===== */
-window.chooseGame=function(g){
+window.chooseGame=g=>{
   currentGame=g;
   gameTitle.innerText=g+" : เลือกแนวเกม";
   modeList.innerHTML="";
@@ -303,13 +342,13 @@ window.chooseGame=function(g){
   show("page2");
 };
 
-window.chooseMode=function(m){
+window.chooseMode=m=>{
   serverList.innerHTML="";
-  servers
-    .filter(s=>s.game===currentGame && s.modes.includes(m))
+  servers.filter(s=>s.game===currentGame && s.modes.includes(m))
     .forEach(s=>{
+      const h = 150 + Math.floor(Math.random()*80); // ความสูงสุ่ม
       serverList.innerHTML+=`
-      <div class="card">
+      <div class="card" style="height:${h}px">
         <img src="${s.img}">
         <button onclick="openDetail('${s.id}')">${s.name}</button>
       </div>`;
@@ -317,7 +356,7 @@ window.chooseMode=function(m){
   show("page3");
 };
 
-window.openDetail=function(id){
+window.openDetail=id=>{
   const s=servers.find(x=>x.id===id);
   if(!s) return;
   detailName.innerText=s.name;
@@ -328,20 +367,18 @@ window.openDetail=function(id){
   show("page4");
 };
 
-/* ===== ADD ===== */
-window.toggleAdd=function(){
+/* ===== ADD SERVER ===== */
+window.toggleAdd=()=>{
   mcFields.classList.toggle("hidden",addGame.value!=="Minecraft");
   rbxFields.classList.toggle("hidden",addGame.value!=="Roblox");
 };
-
-window.updateAddModes=function(){
+window.updateAddModes=()=>{
   addModeList.innerHTML="";
   if(!addGame.value) return;
   modesByGame[addGame.value].forEach(m=>{
     addModeList.innerHTML+=`<label><input type="checkbox" value="${m}"> ${m}</label>`;
   });
 };
-
 addImg.onchange=()=>{
   const f=addImg.files[0];
   if(!f) return;
@@ -352,8 +389,7 @@ addImg.onchange=()=>{
   };
   r.readAsDataURL(f);
 };
-
-window.saveServer=function(){
+window.saveServer=()=>{
   const modes=[...addModeList.querySelectorAll("input:checked")].map(c=>c.value);
   if(!addGame.value||!addName.value||!addDesc.value||!modes.length||!imgPreview.dataset.img)
     return alert("กรอกข้อมูลให้ครบ");
@@ -368,11 +404,9 @@ window.saveServer=function(){
     link:rbxLink.value,
     img:imgPreview.dataset.img
   });
-
   alert("บันทึกเรียบร้อย");
   show("page1");
 };
 </script>
-
 </body>
 </html>
