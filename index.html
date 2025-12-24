@@ -27,6 +27,7 @@ input,select,textarea{width:100%;padding:10px;margin-bottom:10px;border-radius:8
 .preview img{width:100%;height:100%;object-fit:cover;}
 .page{opacity:1;transition: opacity .4s;}
 .page.hidden{opacity:0;pointer-events:none;position:absolute;top:0;left:0;right:0;}
+.filter-box{margin-bottom:15px;padding:10px;background:#1b1b26;border-radius:10px;display:flex;gap:10px;flex-wrap:wrap;}
 </style>
 </head>
 <body>
@@ -56,6 +57,23 @@ input,select,textarea{width:100%;padding:10px;margin-bottom:10px;border-radius:8
 <div id="page3" class="page hidden">
   <button class="back" onclick="goPage(2)">← ย้อนกลับ</button>
   <h2>เลือกเซิร์ฟเวอร์</h2>
+  <div id="filterContainer" class="filter-box hidden">
+    <label>เวอร์ชัน:
+      <select id="filterVersion" onchange="renderServers()">
+        <option value="">ทั้งหมด</option>
+        <option value="original">แท้</option>
+        <option value="both">แท้/เถื่อน</option>
+      </select>
+    </label>
+    <label>Edition:
+      <select id="filterEdition" onchange="renderServers()">
+        <option value="">ทั้งหมด</option>
+        <option value="java">Java</option>
+        <option value="bedrock">Bedrock / แบคล๊อก</option>
+        <option value="both">ทั้งสอง</option>
+      </select>
+    </label>
+  </div>
   <div class="grid" id="serverList"></div>
 </div>
 
@@ -140,13 +158,14 @@ const phoneIP=document.getElementById("phoneIP");
 const rbxLink=document.getElementById("rbxLink");
 const addImg=document.getElementById("addImg");
 const imgPreview=document.getElementById("imgPreview");
-
-// Minecraft fields
 const mcExtra=document.getElementById("mcExtra");
 const mcVersion=document.getElementById("mcVersion");
 const mcEdition=document.getElementById("mcEdition");
 const mcRealVersion=document.getElementById("mcRealVersion");
 const deleteBtn=document.getElementById("deleteBtn");
+const filterContainer=document.getElementById("filterContainer");
+const filterVersion=document.getElementById("filterVersion");
+const filterEdition=document.getElementById("filterEdition");
 
 let servers=[];
 let currentGame="", currentMode="", currentServerId="";
@@ -171,21 +190,28 @@ window.chooseGame=g=>{
 };
 window.chooseMode=m=>{
   currentMode=m;
+  filterContainer.classList.toggle("hidden", currentGame!=="Minecraft");
   renderServers();
   show("page3");
 };
 
-/* Render servers */
+/* Render servers with filter */
 function renderServers(){
   serverList.innerHTML="";
-  servers.filter(s=>s.game===currentGame && s.modes.includes(currentMode))
-    .forEach(s=>{
-      const card=document.createElement("div");
-      card.className="card";
-      card.innerHTML=`<img src="${s.img}"><button onclick="openDetail('${s.id}')">${s.name}</button><button class="delete-btn">ลบ</button>`;
-      card.querySelector(".delete-btn").onclick=()=>deleteServer(s.id);
-      serverList.appendChild(card);
-    });
+  let filtered = servers.filter(s=>s.game===currentGame && Array.isArray(s.modes) && s.modes.includes(currentMode));
+  if(currentGame==="Minecraft"){
+    const v=filterVersion.value;
+    const e=filterEdition.value;
+    if(v) filtered = filtered.filter(s=>s.version===v);
+    if(e) filtered = filtered.filter(s=>s.edition===e);
+  }
+  filtered.forEach(s=>{
+    const card=document.createElement("div");
+    card.className="card";
+    card.innerHTML=`<img src="${s.img}"><button onclick="openDetail('${s.id}')">${s.name}</button><button class="delete-btn">ลบ</button>`;
+    card.querySelector(".delete-btn").onclick=()=>deleteServer(s.id);
+    serverList.appendChild(card);
+  });
 }
 
 /* Detail */
@@ -197,14 +223,14 @@ window.openDetail=id=>{
   detailDesc.innerText=s.desc;
   detailImg.innerHTML=`<img src="${s.img}">`;
   detailExtra.innerHTML=s.game==="Minecraft"
-    ? `<p>PC IP: ${s.pc}</p><p>Phone IP: ${s.phone}</p><p>Version: ${s.version}</p><p>Edition: ${s.edition}</p><p>Real Version: ${s.realVersion||"-"}</p>`
+    ? `<p>PC IP: ${s.pc||"-"}</p><p>Phone IP: ${s.phone||"-"}</p><p>Version: ${s.version||"-"}</p><p>Edition: ${s.edition||"-"}</p><p>Real Version: ${s.realVersion||"-"}</p>`
     : `<a href="${s.link}" target="_blank"><button>เข้า Roblox</button></a>`;
   show("page4");
 };
 
 /* Delete server */
-deleteBtn.onclick = ()=>{if(currentServerId && confirm("คุณต้องการลบเซิฟนี้ใช่หรือไม่?")){remove(ref(db,"servers/"+currentServerId)); renderServers(); show("page1");}};
-function deleteServer(id){if(confirm("คุณต้องการลบเซิฟนี้ใช่หรือไม่?")){remove(ref(db,"servers/"+id)); renderServers();}}
+deleteBtn.onclick = ()=>{if(currentServerId && confirm("คุณต้องการลบเซิฟนี้ใช่หรือไม่?")){remove(ref(db,"servers/"+currentServerId)); show("page1");}};
+function deleteServer(id){if(confirm("คุณต้องการลบเซิฟนี้ใช่หรือไม่?")){remove(ref(db,"servers/"+id));}}
 
 /* Add server */
 window.toggleAdd=()=>{
@@ -228,24 +254,35 @@ addImg.onchange=()=>{
 window.saveServer=()=>{
   const modes=[...addModeList.querySelectorAll("input:checked")].map(c=>c.value);
   if(!addGame.value||!addName.value||!addDesc.value||!modes.length||!imgPreview.dataset.img) return alert("กรอกข้อมูลให้ครบ");
-  push(ref(db,"servers"),{
+
+  const serverData = {
     game:addGame.value,
     name:addName.value,
     desc:addDesc.value,
-    modes,
-    pc:pcIP.value,
-    phone:phoneIP.value,
-    link:rbxLink.value,
+    modes:modes,
+    pc:pcIP.value || null,
+    phone:phoneIP.value || null,
+    link:rbxLink.value || null,
     img:imgPreview.dataset.img,
     version:addGame.value==="Minecraft"?mcVersion.value:null,
     edition:addGame.value==="Minecraft"?mcEdition.value:null,
     realVersion:addGame.value==="Minecraft"?mcRealVersion.value:null
+  };
+
+  push(ref(db,"servers"), serverData).then(()=>{
+    alert("บันทึกเรียบร้อย");
+    show("page1");
+    // Reset form
+    addName.value = addDesc.value = pcIP.value = phoneIP.value = rbxLink.value = mcRealVersion.value = "";
+    addModeList.innerHTML = "";
+    imgPreview.innerHTML = "ยังไม่ได้เลือกรูป";
+    imgPreview.dataset.img = "";
+    addGame.value="";
+    toggleAdd();
   });
-  alert("บันทึกเรียบร้อย");
-  show("page1");
 };
 
-/* Firebase real-time listener */
+/* Firebase listener */
 onValue(ref(db,"servers"), snap=>{
   servers=[];
   snap.forEach(c=>servers.push({id:c.key,...c.val()}));
